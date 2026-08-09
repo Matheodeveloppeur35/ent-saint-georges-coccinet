@@ -1,10 +1,29 @@
-import { useState, type FormEvent } from 'react'
+import {
+  useState,
+  type FormEvent,
+} from 'react'
 import { supabase } from '../lib/supabase'
 import { usernameToInternalEmail } from '../lib/auth'
+import { FirstLoginPage } from './FirstLoginPage'
+
+type Profile = {
+  username: string
+  first_name: string
+  last_name: string
+  account_status:
+    | 'invited'
+    | 'active'
+    | 'suspended'
+    | 'locked'
+    | 'archived'
+  must_change_password: boolean
+}
 
 export function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [profile, setProfile] =
+    useState<Profile | null>(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -32,32 +51,49 @@ export function LoginPage() {
       }
 
       const {
-  data: { user },
-} = await supabase.auth.getUser()
+        data: { user },
+      } = await supabase.auth.getUser()
 
-if (!user) {
-  throw new Error(
-    'La session utilisateur est introuvable.',
-  )
-}
+      if (!user) {
+        throw new Error(
+          'La session utilisateur est introuvable.',
+        )
+      }
 
-const { data: profile, error: profileError } =
-  await supabase
-    .from('profiles')
-    .select('username, first_name, last_name, account_status')
-    .eq('id', user.id)
-    .single()
+      const {
+        data: accountProfile,
+        error: profileError,
+      } = await supabase
+        .from('profiles')
+        .select(`
+          username,
+          first_name,
+          last_name,
+          account_status,
+          must_change_password
+        `)
+        .eq('id', user.id)
+        .single()
 
-if (profileError) {
-  throw new Error(
-    'Le profil administrateur est inaccessible.',
-  )
-}
+      if (profileError || !accountProfile) {
+        throw new Error(
+          'Le profil administrateur est inaccessible.',
+        )
+      }
 
-alert(
-  `Bienvenue ${profile.first_name} ${profile.last_name} (${profile.username})`,
-)
+      if (
+        accountProfile.account_status === 'suspended' ||
+        accountProfile.account_status === 'locked' ||
+        accountProfile.account_status === 'archived'
+      ) {
+        await supabase.auth.signOut()
 
+        throw new Error(
+          'Ce compte est actuellement désactivé.',
+        )
+      }
+
+      setProfile(accountProfile as Profile)
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
@@ -67,6 +103,49 @@ alert(
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (profile?.must_change_password) {
+    return (
+      <FirstLoginPage
+        firstName={profile.first_name}
+        onPasswordChanged={() => {
+          setProfile({
+            ...profile,
+            must_change_password: false,
+            account_status: 'active',
+          })
+        }}
+      />
+    )
+  }
+
+  if (profile) {
+    return (
+      <main>
+        <section>
+          <p>ENT Saint Georges Coccinet</p>
+
+          <h1>
+            Bienvenue, {profile.first_name}{' '}
+            {profile.last_name}
+          </h1>
+
+          <p>Votre compte est maintenant connecté.</p>
+
+          <button
+            type="button"
+            onClick={async () => {
+              await supabase.auth.signOut()
+              setProfile(null)
+              setPassword('')
+            }}
+          >
+            Se déconnecter
+          </button>
+        </section>
+      </main>
+    )
   }
 
   return (
