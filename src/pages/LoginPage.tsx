@@ -5,6 +5,8 @@ import {
 import { supabase } from '../lib/supabase'
 import { usernameToInternalEmail } from '../lib/auth'
 import { FirstLoginPage } from './FirstLoginPage'
+import { AdminDashboardPage } from './AdminDashboardPage'
+
 
 type Profile = {
   username: string
@@ -121,32 +123,18 @@ export function LoginPage() {
   }
 
   if (profile) {
-    return (
-      <main>
-        <section>
-          <p>ENT Saint Georges Coccinet</p>
-
-          <h1>
-            Bienvenue, {profile.first_name}{' '}
-            {profile.last_name}
-          </h1>
-
-          <p>Votre compte est maintenant connecté.</p>
-
-          <button
-            type="button"
-            onClick={async () => {
-              await supabase.auth.signOut()
-              setProfile(null)
-              setPassword('')
-            }}
-          >
-            Se déconnecter
-          </button>
-        </section>
-      </main>
-    )
-  }
+  return (
+    <AdminDashboardPage
+      firstName={profile.first_name}
+      lastName={profile.last_name}
+      onSignOut={() => {
+        setProfile(null)
+        setUsername('')
+        setPassword('')
+      }}
+    />
+  )
+}
 
   return (
     <main>
