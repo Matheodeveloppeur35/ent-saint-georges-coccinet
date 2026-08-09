@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { ClassesPage } from './ClassesPage'
 
 type AdminDashboardPageProps = {
   firstName: string
@@ -6,11 +8,16 @@ type AdminDashboardPageProps = {
   onSignOut: () => void
 }
 
+type AdminPage = 'dashboard' | 'classes'
+
 export function AdminDashboardPage({
   firstName,
   lastName,
   onSignOut,
 }: AdminDashboardPageProps) {
+  const [currentPage, setCurrentPage] =
+    useState<AdminPage>('dashboard')
+
   async function handleSignOut() {
     const { error } = await supabase.auth.signOut()
 
@@ -22,46 +29,62 @@ export function AdminDashboardPage({
     onSignOut()
   }
 
+  if (currentPage === 'classes') {
+    return (
+      <ClassesPage
+        onBack={() => setCurrentPage('dashboard')}
+      />
+    )
+  }
+
   const modules = [
     {
       title: 'Utilisateurs',
       description:
         'Créer, modifier, suspendre et gérer les comptes.',
+      action: undefined,
     },
     {
       title: 'Rôles et permissions',
       description:
         'Attribuer les espaces et contrôler les accès.',
+      action: undefined,
     },
     {
       title: 'Classes',
       description:
         'Gérer les classes, les élèves et les affectations.',
+      action: () => setCurrentPage('classes'),
     },
     {
       title: 'Emplois du temps',
       description:
         'Organiser les cours, salles et professeurs.',
+      action: undefined,
     },
     {
       title: 'Vie scolaire',
       description:
         'Consulter les appels, absences et retards.',
+      action: undefined,
     },
     {
       title: 'Notation professorale',
       description:
         'Suivre les appels et les cahiers de texte.',
+      action: undefined,
     },
     {
       title: 'Entreprises et stages',
       description:
         'Gérer les partenaires, stages et conventions.',
+      action: undefined,
     },
     {
       title: 'Paramètres',
       description:
         'Configurer les modules et l’établissement.',
+      action: undefined,
     },
   ]
 
@@ -99,8 +122,14 @@ export function AdminDashboardPage({
               <h3>{module.title}</h3>
               <p>{module.description}</p>
 
-              <button type="button" disabled>
-                Bientôt disponible
+              <button
+                type="button"
+                disabled={!module.action}
+                onClick={module.action}
+              >
+                {module.action
+                  ? 'Ouvrir'
+                  : 'Bientôt disponible'}
               </button>
             </article>
           ))}
