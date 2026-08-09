@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { ClassesPage } from './ClassesPage'
+import { SubjectsPage } from './SubjectsPage'
+
 
 type AdminDashboardPageProps = {
   firstName: string
@@ -8,7 +10,8 @@ type AdminDashboardPageProps = {
   onSignOut: () => void
 }
 
-type AdminPage = 'dashboard' | 'classes'
+type AdminPage = 'dashboard' | 'classes' | 'subjects'
+
 
 export function AdminDashboardPage({
   firstName,
@@ -37,6 +40,14 @@ export function AdminDashboardPage({
     )
   }
 
+if (currentPage === 'subjects') {
+  return (
+    <SubjectsPage
+      onBack={() => setCurrentPage('dashboard')}
+    />
+  )
+}
+
   const modules = [
     {
       title: 'Utilisateurs',
@@ -57,7 +68,13 @@ export function AdminDashboardPage({
       action: () => setCurrentPage('classes'),
     },
     {
-      title: 'Emplois du temps',
+  title: 'Matières',
+  description:
+    'Créer et gérer les matières enseignées.',
+  action: () => setCurrentPage('subjects'),
+},
+{
+ title: 'Emplois du temps',
       description:
         'Organiser les cours, salles et professeurs.',
       action: undefined,
