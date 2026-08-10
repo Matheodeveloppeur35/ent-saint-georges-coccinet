@@ -96,7 +96,9 @@ export function ClassSubjectsPage({
       classesResult.error ||
       subjectsResult.error
     ) {
-      setError('Les données d’affectation n’ont pas pu être chargées.')
+      setError(
+        'Les données d’affectation n’ont pas pu être chargées.',
+      )
     } else {
       setItems(linksResult.data as ClassSubject[])
       setTeachers(teachersResult.data as Teacher[])
@@ -115,6 +117,7 @@ export function ClassSubjectsPage({
     event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault()
+
     setError('')
     setSuccess('')
 
@@ -125,7 +128,37 @@ export function ClassSubjectsPage({
       return
     }
 
+    const selectedYear = academicYear.trim()
+    if (!selectedYear) {
+      setError('L’année scolaire est obligatoire.')
+      return
+    }
+
     setIsCreating(true)
+
+    // Vérification anti-doublon côté app (message plus lisible)
+    const { data: existing, error: checkError } = await supabase
+      .from('class_subjects')
+      .select('id')
+      .eq('teacher_id', teacherId)
+      .eq('class_id', classId)
+      .eq('subject_id', subjectId)
+      .eq('academic_year', selectedYear)
+      .limit(1)
+
+    if (checkError) {
+      setError("La vérification d’unicité a échoué.")
+      setIsCreating(false)
+      return
+    }
+
+    if (existing && existing.length > 0) {
+      setError(
+        'Cette affectation existe déjà pour cette année.',
+      )
+      setIsCreating(false)
+      return
+    }
 
     const { error: createError } = await supabase
       .from('class_subjects')
@@ -133,7 +166,7 @@ export function ClassSubjectsPage({
         teacher_id: teacherId,
         class_id: classId,
         subject_id: subjectId,
-        academic_year: academicYear.trim(),
+        academic_year: selectedYear,
       })
 
     if (createError) {
@@ -141,10 +174,10 @@ export function ClassSubjectsPage({
         setError(
           'Cette affectation existe déjà pour cette année.',
         )
+      } else if ((createError as { status?: number }).status === 409) {
+        setError('Conflit : cette affectation existe déjà.')
       } else {
-        setError(
-          "L’affectation n’a pas pu être créée.",
-        )
+        setError("L’affectation n’a pas pu être créée.")
       }
     } else {
       setTeacherId('')
@@ -175,7 +208,9 @@ export function ClassSubjectsPage({
 
         <form onSubmit={handleCreate}>
           <div>
-            <label htmlFor="link-teacher">Professeur</label>
+            <label htmlFor="link-teacher">
+              Professeur
+            </label>
 
             <select
               id="link-teacher"
@@ -185,7 +220,9 @@ export function ClassSubjectsPage({
               }
               required
             >
-              <option value="">Choisir un professeur</option>
+              <option value="">
+                Choisir un professeur
+              </option>
 
               {teachers.map((teacher) => (
                 <option
@@ -200,7 +237,9 @@ export function ClassSubjectsPage({
           </div>
 
           <div>
-            <label htmlFor="link-class">Classe</label>
+            <label htmlFor="link-class">
+              Classe
+            </label>
 
             <select
               id="link-class"
@@ -210,7 +249,9 @@ export function ClassSubjectsPage({
               }
               required
             >
-              <option value="">Choisir une classe</option>
+              <option value="">
+                Choisir une classe
+              </option>
 
               {classes.map((schoolClass) => (
                 <option
@@ -225,7 +266,9 @@ export function ClassSubjectsPage({
           </div>
 
           <div>
-            <label htmlFor="link-subject">Matière</label>
+            <label htmlFor="link-subject">
+              Matière
+            </label>
 
             <select
               id="link-subject"
@@ -235,7 +278,9 @@ export function ClassSubjectsPage({
               }
               required
             >
-              <option value="">Choisir une matière</option>
+              <option value="">
+                Choisir une matière
+              </option>
 
               {subjects.map((subject) => (
                 <option
@@ -274,8 +319,17 @@ export function ClassSubjectsPage({
           </button>
         </form>
 
-        {success && <p role="status">{success}</p>}
-        {error && <p role="alert">{error}</p>}
+        {success && (
+          <p role="status">
+            {success}
+          </p>
+        )}
+
+        {error && (
+          <p role="alert">
+            {error}
+          </p>
+        )}
       </section>
 
       <section>
