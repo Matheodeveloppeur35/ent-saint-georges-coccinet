@@ -6,6 +6,7 @@ import { StudentsPage } from './StudentsPage'
 import { TeachersPage } from './TeachersPage'
 import { ClassSubjectsPage } from './ClassSubjectsPage'
 import { TimetablesPage } from './TimetablesPage'
+import { LessonsPage } from './LessonsPage'
 
 type AdminDashboardPageProps = {
   firstName: string
@@ -21,6 +22,7 @@ type AdminPage =
   | 'teachers'
   | 'class_subjects'
   | 'timetables'
+  | 'lessons'
 
 export function AdminDashboardPage({
   firstName,
@@ -84,6 +86,9 @@ if (currentPage === 'timetables') {
     <TimetablesPage onBack={() => setCurrentPage('dashboard')} />
   )
 }
+if (currentPage === 'lessons') {
+  return <LessonsPage onBack={() => setCurrentPage('dashboard')} />
+}
 
   const modules = [
   {
@@ -134,6 +139,13 @@ if (currentPage === 'timetables') {
       'Créer les cours et ajouter les entrées (salle, notes, annulations).',
     action: () => setCurrentPage('timetables'),
   },
+{
+  title: 'Cahier de texte',
+  description:
+    'Créer des séances et enregistrer travaux / notes.',
+  action: () => setCurrentPage('lessons'),
+},
+
   {
     title: 'Vie scolaire',
     description:
