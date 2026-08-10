@@ -4,6 +4,7 @@ import { ClassesPage } from './ClassesPage'
 import { SubjectsPage } from './SubjectsPage'
 import { StudentsPage } from './StudentsPage'
 import { TeachersPage } from './TeachersPage'
+import { ClassSubjectsPage } from './ClassSubjectsPage'
 
 type AdminDashboardPageProps = {
   firstName: string
@@ -17,6 +18,7 @@ type AdminPage =
   | 'subjects'
   | 'students'
   | 'teachers'
+  | 'class_subjects'
 
 export function AdminDashboardPage({
   firstName,
@@ -68,6 +70,13 @@ export function AdminDashboardPage({
       />
     )
   }
+if (currentPage === 'class_subjects') {
+  return (
+    <ClassSubjectsPage
+      onBack={() => setCurrentPage('dashboard')}
+    />
+  )
+}
 
   const modules = [
     {
@@ -100,6 +109,13 @@ export function AdminDashboardPage({
         'Créer et gérer les profils enseignants.',
       action: () => setCurrentPage('teachers'),
     },
+{
+  title: 'Affectations',
+  description:
+    'Relier professeurs, classes et matières.',
+  action: () => setCurrentPage('class_subjects'),
+},
+
     {
       title: 'Matières',
       description:
