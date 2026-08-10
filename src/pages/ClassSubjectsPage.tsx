@@ -20,16 +20,44 @@ type Subject = {
   short_name: string
 }
 
+type Related<T> = T | T[] | null
+
 type ClassSubject = {
   id: string
   academic_year: string
-  teachers: Teacher[] | null
-  classes: SchoolClass[] | null
-  subjects: Subject[] | null
+  teachers: Related<Teacher>
+  classes: Related<SchoolClass>
+  subjects: Related<Subject>
 }
 
 type ClassSubjectsPageProps = {
   onBack: () => void
+}
+
+function firstOrNull<T>(value: T | T[] | null): T | null {
+  if (Array.isArray(value)) {
+    return value.length > 0 ? value[0] : null
+  }
+
+  return value
+}
+
+function toDisplayName(value: Teacher | null) {
+  return value
+    ? `${value.last_name} ${value.first_name}`
+    : '-'
+}
+
+function toClassDisplay(value: SchoolClass | null) {
+  return value
+    ? `${value.name} — ${value.school_year}`
+    : '-'
+}
+
+function toSubjectDisplay(value: Subject | null) {
+  return value
+    ? `${value.name} (${value.short_name})`
+    : '-'
 }
 
 export function ClassSubjectsPage({
@@ -100,7 +128,19 @@ export function ClassSubjectsPage({
         'Les données d’affectation n’ont pas pu être chargées.',
       )
     } else {
-      setItems(linksResult.data as ClassSubject[])
+      const rawLinks = linksResult.data ?? []
+
+      const normalizedItems: ClassSubject[] = rawLinks.map(
+        (item: any) => ({
+          id: item.id,
+          academic_year: item.academic_year,
+          teachers: firstOrNull<Teacher>(item.teachers),
+          classes: firstOrNull<SchoolClass>(item.classes),
+          subjects: firstOrNull<Subject>(item.subjects),
+        }),
+      )
+
+      setItems(normalizedItems)
       setTeachers(teachersResult.data as Teacher[])
       setClasses(classesResult.data as SchoolClass[])
       setSubjects(subjectsResult.data as Subject[])
@@ -129,14 +169,14 @@ export function ClassSubjectsPage({
     }
 
     const selectedYear = academicYear.trim()
+
     if (!selectedYear) {
-      setError('L’année scolaire est obligatoire.')
+      setError("L’année scolaire est obligatoire.")
       return
     }
 
     setIsCreating(true)
 
-    // Vérification anti-doublon côté app (message plus lisible)
     const { data: existing, error: checkError } = await supabase
       .from('class_subjects')
       .select('id')
@@ -147,7 +187,7 @@ export function ClassSubjectsPage({
       .limit(1)
 
     if (checkError) {
-      setError("La vérification d’unicité a échoué.")
+      setError('La vérification d’unicité a échoué.')
       setIsCreating(false)
       return
     }
@@ -225,10 +265,7 @@ export function ClassSubjectsPage({
               </option>
 
               {teachers.map((teacher) => (
-                <option
-                  key={teacher.id}
-                  value={teacher.id}
-                >
+                <option key={teacher.id} value={teacher.id}>
                   {teacher.last_name} {teacher.first_name} (
                   {teacher.employee_number})
                 </option>
@@ -237,9 +274,7 @@ export function ClassSubjectsPage({
           </div>
 
           <div>
-            <label htmlFor="link-class">
-              Classe
-            </label>
+            <label htmlFor="link-class">Classe</label>
 
             <select
               id="link-class"
@@ -249,26 +284,18 @@ export function ClassSubjectsPage({
               }
               required
             >
-              <option value="">
-                Choisir une classe
-              </option>
+              <option value="">Choisir une classe</option>
 
               {classes.map((schoolClass) => (
-                <option
-                  key={schoolClass.id}
-                  value={schoolClass.id}
-                >
-                  {schoolClass.name} —{' '}
-                  {schoolClass.school_year}
+                <option key={schoolClass.id} value={schoolClass.id}>
+                  {schoolClass.name} — {schoolClass.school_year}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label htmlFor="link-subject">
-              Matière
-            </label>
+            <label htmlFor="link-subject">Matière</label>
 
             <select
               id="link-subject"
@@ -278,15 +305,10 @@ export function ClassSubjectsPage({
               }
               required
             >
-              <option value="">
-                Choisir une matière
-              </option>
+              <option value="">Choisir une matière</option>
 
               {subjects.map((subject) => (
-                <option
-                  key={subject.id}
-                  value={subject.id}
-                >
+                <option key={subject.id} value={subject.id}>
                   {subject.name} ({subject.short_name})
                 </option>
               ))}
@@ -309,27 +331,15 @@ export function ClassSubjectsPage({
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={isCreating}
-          >
+          <button type="submit" disabled={isCreating}>
             {isCreating
               ? 'Création en cours...'
               : 'Créer l’affectation'}
           </button>
         </form>
 
-        {success && (
-          <p role="status">
-            {success}
-          </p>
-        )}
-
-        {error && (
-          <p role="alert">
-            {error}
-          </p>
-        )}
+        {success && <p role="status">{success}</p>}
+        {error && <p role="alert">{error}</p>}
       </section>
 
       <section>
@@ -355,24 +365,9 @@ export function ClassSubjectsPage({
             <tbody>
               {items.map((item) => (
                 <tr key={item.id}>
-                  <td>
-                    {item.teachers?.[0]
-                      ? `${item.teachers[0].last_name} ${item.teachers[0].first_name}`
-                      : '-'}
-                  </td>
-
-                  <td>
-                    {item.classes?.[0]
-                      ? `${item.classes[0].name} — ${item.classes[0].school_year}`
-                      : '-'}
-                  </td>
-
-                  <td>
-                    {item.subjects?.[0]
-                      ? `${item.subjects[0].name} (${item.subjects[0].short_name})`
-                      : '-'}
-                  </td>
-
+                  <td>{toDisplayName(item.teachers)}</td>
+                  <td>{toClassDisplay(item.classes)}</td>
+                  <td>{toSubjectDisplay(item.subjects)}</td>
                   <td>{item.academic_year}</td>
                 </tr>
               ))}
