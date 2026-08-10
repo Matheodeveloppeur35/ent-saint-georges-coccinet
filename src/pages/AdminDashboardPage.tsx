@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { ClassesPage } from './ClassesPage'
 import { SubjectsPage } from './SubjectsPage'
 import { StudentsPage } from './StudentsPage'
-
+import { TeachersPage } from './TeachersPage'
 
 type AdminDashboardPageProps = {
   firstName: string
@@ -16,8 +16,7 @@ type AdminPage =
   | 'classes'
   | 'subjects'
   | 'students'
-
-
+  | 'teachers'
 
 export function AdminDashboardPage({
   firstName,
@@ -46,20 +45,29 @@ export function AdminDashboardPage({
     )
   }
 
-if (currentPage === 'subjects') {
-  return (
-    <SubjectsPage
-      onBack={() => setCurrentPage('dashboard')}
-    />
-  )
-}
-if (currentPage === 'students') {
-  return (
-    <StudentsPage
-      onBack={() => setCurrentPage('dashboard')}
-    />
-  )
-}
+  if (currentPage === 'subjects') {
+    return (
+      <SubjectsPage
+        onBack={() => setCurrentPage('dashboard')}
+      />
+    )
+  }
+
+  if (currentPage === 'students') {
+    return (
+      <StudentsPage
+        onBack={() => setCurrentPage('dashboard')}
+      />
+    )
+  }
+
+  if (currentPage === 'teachers') {
+    return (
+      <TeachersPage
+        onBack={() => setCurrentPage('dashboard')}
+      />
+    )
+  }
 
   const modules = [
     {
@@ -80,21 +88,26 @@ if (currentPage === 'students') {
         'Gérer les classes, les élèves et les affectations.',
       action: () => setCurrentPage('classes'),
     },
-{
-  title: 'Élèves',
-  description:
-    'Créer et gérer les dossiers scolaires des élèves.',
-  action: () => setCurrentPage('students'),
-},
-
     {
-  title: 'Matières',
-  description:
-    'Créer et gérer les matières enseignées.',
-  action: () => setCurrentPage('subjects'),
-},
-{
- title: 'Emplois du temps',
+      title: 'Élèves',
+      description:
+        'Créer et gérer les dossiers scolaires des élèves.',
+      action: () => setCurrentPage('students'),
+    },
+    {
+      title: 'Professeurs',
+      description:
+        'Créer et gérer les profils enseignants.',
+      action: () => setCurrentPage('teachers'),
+    },
+    {
+      title: 'Matières',
+      description:
+        'Créer et gérer les matières enseignées.',
+      action: () => setCurrentPage('subjects'),
+    },
+    {
+      title: 'Emplois du temps',
       description:
         'Organiser les cours, salles et professeurs.',
       action: undefined,
@@ -130,11 +143,9 @@ if (currentPage === 'students') {
       <header>
         <div>
           <p>ENT Saint Georges Coccinet</p>
-
           <h1>
             Bonjour, {firstName} {lastName}
           </h1>
-
           <p>Espace Administrateur</p>
         </div>
 
@@ -148,17 +159,13 @@ if (currentPage === 'students') {
 
       <section>
         <h2>Tableau de bord</h2>
-
-        <p>
-          Gérez les principaux services de votre ENT.
-        </p>
+        <p>Gérez les principaux services de votre ENT.</p>
 
         <div>
           {modules.map((module) => (
             <article key={module.title}>
               <h3>{module.title}</h3>
               <p>{module.description}</p>
-
               <button
                 type="button"
                 disabled={!module.action}
