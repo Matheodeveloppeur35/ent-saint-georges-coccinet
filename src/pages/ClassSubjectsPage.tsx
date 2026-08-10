@@ -20,50 +20,30 @@ type Subject = {
   short_name: string
 }
 
-type Related<T> = T | T[] | null
-
-type ClassSubject = {
+type ClassSubjectRaw = {
   id: string
   academic_year: string
-  teachers: Related<Teacher>
-  classes: Related<SchoolClass>
-  subjects: Related<Subject>
+  teacher_id: string | null
+  class_id: string | null
+  subject_id: string | null
+}
+
+type ClassSubjectDisplay = {
+  id: string
+  academic_year: string
+  teacherLabel: string
+  classLabel: string
+  subjectLabel: string
 }
 
 type ClassSubjectsPageProps = {
   onBack: () => void
 }
 
-function firstOrNull<T>(value: T | T[] | null): T | null {
-  if (Array.isArray(value)) {
-    return value.length > 0 ? value[0] : null
-  }
-
-  return value
-}
-
-function toDisplayName(value: Teacher | null) {
-  return value
-    ? `${value.last_name} ${value.first_name}`
-    : '-'
-}
-
-function toClassDisplay(value: SchoolClass | null) {
-  return value
-    ? `${value.name} — ${value.school_year}`
-    : '-'
-}
-
-function toSubjectDisplay(value: Subject | null) {
-  return value
-    ? `${value.name} (${value.short_name})`
-    : '-'
-}
-
 export function ClassSubjectsPage({
   onBack,
 }: ClassSubjectsPageProps) {
-  const [items, setItems] = useState<ClassSubject[]>([])
+  const [items, setItems] = useState<ClassSubjectDisplay[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [classes, setClasses] = useState<SchoolClass[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -82,69 +62,131 @@ export function ClassSubjectsPage({
     setIsLoading(true)
     setError('')
 
+    const linksResult = await supabase
+      .from('class_subjects')
+      .select('id, academic_year, teacher_id, class_id, subject_id')
+      .order('academic_year', { ascending: false })
+
+    if (linksResult.error) {
+      setError("La liste des affectations n’a pas pu être chargée.")
+      setIsLoading(false)
+      return
+    }
+
+    const rawLinks = (linksResult.data ?? []) as ClassSubjectRaw[]
+
+    const teacherIds = Array.from(
+      new Set(
+        rawLinks
+          .map((link) => link.teacher_id)
+          .filter((value): value is string => !!value),
+      ),
+    )
+
+    const classIds = Array.from(
+      new Set(
+        rawLinks
+          .map((link) => link.class_id)
+          .filter((value): value is string => !!value),
+      ),
+    )
+
+    const subjectIds = Array.from(
+      new Set(
+        rawLinks
+          .map((link) => link.subject_id)
+          .filter((value): value is string => !!value),
+      ),
+    )
+
     const [
-      linksResult,
       teachersResult,
       classesResult,
       subjectsResult,
     ] = await Promise.all([
-      supabase
-        .from('class_subjects')
-        .select(`
-          id,
-          academic_year,
-          teachers ( id, employee_number, first_name, last_name ),
-          classes ( id, name, school_year ),
-          subjects ( id, name, short_name )
-        `)
-        .order('academic_year', { ascending: false }),
+      teacherIds.length > 0
+        ? supabase
+            .from('teachers')
+            .select('id, employee_number, first_name, last_name')
+            .in('id', teacherIds)
+        : Promise.resolve({ data: [], error: null }),
 
-      supabase
-        .from('teachers')
-        .select('id, employee_number, first_name, last_name')
-        .eq('is_active', true)
-        .order('last_name'),
+      classIds.length > 0
+        ? supabase
+            .from('classes')
+            .select('id, name, school_year')
+            .in('id', classIds)
+        : Promise.resolve({ data: [], error: null }),
 
-      supabase
-        .from('classes')
-        .select('id, name, school_year')
-        .eq('is_active', true)
-        .order('name'),
-
-      supabase
-        .from('subjects')
-        .select('id, name, short_name')
-        .eq('is_active', true)
-        .order('name'),
+      subjectIds.length > 0
+        ? supabase
+            .from('subjects')
+            .select('id, name, short_name')
+            .in('id', subjectIds)
+        : Promise.resolve({ data: [], error: null }),
     ])
 
     if (
-      linksResult.error ||
       teachersResult.error ||
       classesResult.error ||
       subjectsResult.error
     ) {
-      setError(
-        'Les données d’affectation n’ont pas pu être chargées.',
-      )
-    } else {
-      const rawLinks = linksResult.data ?? []
-
-      const normalizedItems: ClassSubject[] = rawLinks.map(
-        (item: any) => ({
-          id: item.id,
-          academic_year: item.academic_year,
-          teachers: firstOrNull<Teacher>(item.teachers),
-          classes: firstOrNull<SchoolClass>(item.classes),
-          subjects: firstOrNull<Subject>(item.subjects),
-        }),
-      )
-
-      setItems(normalizedItems)
-      setTeachers(teachersResult.data as Teacher[])
-      setClasses(classesResult.data as SchoolClass[])
-      setSubjects(subjectsResult.data as Subject[])
+      setError("Les données associées n'ont pas pu être chargées.")
+      setIsLoading(false)
+      return
     }
+
+    const teacherMap = new Map<string, Teacher>()
+    for (const teacher of (teachersResult.data ?? []) as Teacher[]) {
+      teacherMap.set(teacher.id, teacher)
+    }
+
+    const classMap = new Map<string, SchoolClass>()
+    for (const schoolClass of (classesResult.data ??
+      []) as SchoolClass[]) {
+      classMap.set(schoolClass.id, schoolClass)
+    }
+
+    const subjectMap = new Map<string, Subject>()
+    for (const subject of (subjectsResult.data ??
+      []) as Subject[]) {
+      subjectMap.set(subject.id, subject)
+    }
+
+    const normalized: ClassSubjectDisplay[] = rawLinks.map(
+      (link) => {
+        const linkedTeacher = link.teacher_id
+          ? teacherMap.get(link.teacher_id)
+          : null
+
+        const linkedClass = link.class_id
+          ? classMap.get(link.class_id)
+          : null
+
+        const linkedSubject = link.subject_id
+          ? subjectMap.get(link.subject_id)
+          : null
+
+        return {
+          id: link.id,
+          academic_year: link.academic_year,
+          teacherLabel: linkedTeacher
+            ? `${linkedTeacher.last_name} ${linkedTeacher.first_name}`
+            : `- (id introuvable: ${link.teacher_id ?? 'nul'})`,
+          classLabel: linkedClass
+            ? `${linkedClass.name} — ${linkedClass.school_year}`
+            : `- (id introuvable: ${link.class_id ?? 'nul'})`,
+          subjectLabel: linkedSubject
+            ? `${linkedSubject.name} (${linkedSubject.short_name})`
+            : `- (id introuvable: ${link.subject_id ?? 'nul'})`,
+        }
+      },
+    )
+
+    setTeachers((teachersResult.data ?? []) as Teacher[])
+    setClasses((classesResult.data ?? []) as SchoolClass[])
+    setSubjects((subjectsResult.data ?? []) as Subject[])
+    setItems(normalized)
 
     setIsLoading(false)
   }
@@ -169,7 +211,6 @@ export function ClassSubjectsPage({
     }
 
     const selectedYear = academicYear.trim()
-
     if (!selectedYear) {
       setError("L’année scolaire est obligatoire.")
       return
@@ -193,9 +234,7 @@ export function ClassSubjectsPage({
     }
 
     if (existing && existing.length > 0) {
-      setError(
-        'Cette affectation existe déjà pour cette année.',
-      )
+      setError('Cette affectation existe déjà pour cette année.')
       setIsCreating(false)
       return
     }
@@ -248,22 +287,15 @@ export function ClassSubjectsPage({
 
         <form onSubmit={handleCreate}>
           <div>
-            <label htmlFor="link-teacher">
-              Professeur
-            </label>
+            <label htmlFor="link-teacher">Professeur</label>
 
             <select
               id="link-teacher"
               value={teacherId}
-              onChange={(event) =>
-                setTeacherId(event.target.value)
-              }
+              onChange={(event) => setTeacherId(event.target.value)}
               required
             >
-              <option value="">
-                Choisir un professeur
-              </option>
-
+              <option value="">Choisir un professeur</option>
               {teachers.map((teacher) => (
                 <option key={teacher.id} value={teacher.id}>
                   {teacher.last_name} {teacher.first_name} (
@@ -279,13 +311,10 @@ export function ClassSubjectsPage({
             <select
               id="link-class"
               value={classId}
-              onChange={(event) =>
-                setClassId(event.target.value)
-              }
+              onChange={(event) => setClassId(event.target.value)}
               required
             >
               <option value="">Choisir une classe</option>
-
               {classes.map((schoolClass) => (
                 <option key={schoolClass.id} value={schoolClass.id}>
                   {schoolClass.name} — {schoolClass.school_year}
@@ -300,13 +329,10 @@ export function ClassSubjectsPage({
             <select
               id="link-subject"
               value={subjectId}
-              onChange={(event) =>
-                setSubjectId(event.target.value)
-              }
+              onChange={(event) => setSubjectId(event.target.value)}
               required
             >
               <option value="">Choisir une matière</option>
-
               {subjects.map((subject) => (
                 <option key={subject.id} value={subject.id}>
                   {subject.name} ({subject.short_name})
@@ -316,17 +342,13 @@ export function ClassSubjectsPage({
           </div>
 
           <div>
-            <label htmlFor="link-year">
-              Année scolaire
-            </label>
+            <label htmlFor="link-year">Année scolaire</label>
 
             <input
               id="link-year"
               type="text"
               value={academicYear}
-              onChange={(event) =>
-                setAcademicYear(event.target.value)
-              }
+              onChange={(event) => setAcademicYear(event.target.value)}
               required
             />
           </div>
@@ -365,9 +387,9 @@ export function ClassSubjectsPage({
             <tbody>
               {items.map((item) => (
                 <tr key={item.id}>
-                  <td>{toDisplayName(item.teachers)}</td>
-                  <td>{toClassDisplay(item.classes)}</td>
-                  <td>{toSubjectDisplay(item.subjects)}</td>
+                  <td>{item.teacherLabel}</td>
+                  <td>{item.classLabel}</td>
+                  <td>{item.subjectLabel}</td>
                   <td>{item.academic_year}</td>
                 </tr>
               ))}
