@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { ClassesPage } from './ClassesPage'
 import { SubjectsPage } from './SubjectsPage'
+import { StudentsPage } from './StudentsPage'
 
 
 type AdminDashboardPageProps = {
@@ -10,7 +11,12 @@ type AdminDashboardPageProps = {
   onSignOut: () => void
 }
 
-type AdminPage = 'dashboard' | 'classes' | 'subjects'
+type AdminPage =
+  | 'dashboard'
+  | 'classes'
+  | 'subjects'
+  | 'students'
+
 
 
 export function AdminDashboardPage({
@@ -47,6 +53,13 @@ if (currentPage === 'subjects') {
     />
   )
 }
+if (currentPage === 'students') {
+  return (
+    <StudentsPage
+      onBack={() => setCurrentPage('dashboard')}
+    />
+  )
+}
 
   const modules = [
     {
@@ -67,6 +80,13 @@ if (currentPage === 'subjects') {
         'Gérer les classes, les élèves et les affectations.',
       action: () => setCurrentPage('classes'),
     },
+{
+  title: 'Élèves',
+  description:
+    'Créer et gérer les dossiers scolaires des élèves.',
+  action: () => setCurrentPage('students'),
+},
+
     {
   title: 'Matières',
   description:
