@@ -1,212 +1,479 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { supabase } from "../lib/supabase";
 import "./LessonsPage.css";
 
-type LessonStatus = "A_FAIRE" | "EN_COURS" | "TERMINE";
+type Relation<T> = T | T[] | null;
+
+type Teacher = {
+  first_name: string;
+  last_name: string;
+};
+
+type SchoolClass = {
+  name: string;
+  level: string;
+};
+
+type Subject = {
+  name: string;
+  short_name: string;
+  color: string;
+};
+
+type ClassSubject = {
+  classes: Relation<SchoolClass>;
+  subjects: Relation<Subject>;
+  teachers: Relation<Teacher>;
+};
+
+type Timetable = {
+  day_of_week: number;
+  starts_at: string;
+  ends_at: string;
+  room: string | null;
+  academic_year: string;
+  class_subjects: Relation<ClassSubject>;
+};
+
 type Lesson = {
   id: string;
-  matiere: string;
-  classe: string;
-  enseignant: string;
-  date: string; // ISO (YYYY-MM-DD)
-  heure: string; // HH:mm
-  duree: number; // minutes
-  statut: LessonStatus;
+  title: string;
+  description: string | null;
+  is_published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+  timetables: Relation<Timetable>;
+};
+
+type LessonEntryRow = {
+  id: string;
+  lesson_id: string;
+  work_text: string | null;
+  note: string | null;
+  homework_due_date: string | null;
+  created_at: string;
+  updated_at: string;
+  lessons: Relation<Lesson>;
+};
+
+type LessonView = {
+  id: string;
+  title: string;
   description: string;
+  workText: string;
+  note: string;
+  homeworkDueDate: string | null;
+  isPublished: boolean;
+  publishedAt: string | null;
+  className: string;
+  classLevel: string;
+  subjectName: string;
+  subjectShortName: string;
+  subjectColor: string;
+  teacherName: string;
+  dayOfWeek: number | null;
+  startsAt: string;
+  endsAt: string;
+  room: string;
+  academicYear: string;
 };
 
-const SAMPLE_LESSONS: Lesson[] = [
-  {
-    id: "L-101",
-    matiere: "Mathématiques",
-    classe: "CM1",
-    enseignant: "Mme Dupont",
-    date: "2026-08-11",
-    heure: "08:30",
-    duree: 45,
-    statut: "A_FAIRE",
-    description: "Révisions fractions et simplification."
-  },
-  {
-    id: "L-102",
-    matiere: "Français",
-    classe: "CM2",
-    enseignant: "M. Martin",
-    date: "2026-08-11",
-    heure: "10:00",
-    duree: 30,
-    statut: "EN_COURS",
-    description: "Lecture suivie - dictée mensuelle."
-  },
-  {
-    id: "L-103",
-    matiere: "Histoire",
-    classe: "CE1",
-    enseignant: "Mme Lemoine",
-    date: "2026-08-12",
-    heure: "13:30",
-    duree: 60,
-    statut: "TERMINE",
-    description: "Bilan chapitre 3 : la Révolution."
+const DAY_LABELS: Record<number, string> = {
+  1: "Lundi",
+  2: "Mardi",
+  3: "Mercredi",
+  4: "Jeudi",
+  5: "Vendredi",
+  6: "Samedi",
+  7: "Dimanche",
+};
+
+function firstRelation<T>(relation: Relation<T>): T | null {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
   }
-];
 
-const statusLabel: Record<LessonStatus, string> = {
-  A_FAIRE: "À faire",
-  EN_COURS: "En cours",
-  TERMINE: "Terminé"
-};
+  return relation;
+}
 
-const statusClass: Record<LessonStatus, string> = {
-  A_FAIRE: "status todo",
-  EN_COURS: "status progress",
-  TERMINE: "status done"
-};
+function formatTime(value: string): string {
+  return value ? value.slice(0, 5) : "—";
+}
 
-const formatDateFR = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("fr-FR", {
-    weekday: "short",
+function formatDate(value: string | null): string {
+  if (!value) {
+    return "—";
+  }
+
+  return new Intl.DateTimeFormat("fr-FR", {
     day: "2-digit",
     month: "2-digit",
-    year: "numeric"
-  });
+    year: "numeric",
+  }).format(new Date(`${value}T00:00:00`));
+}
+
+function normalizeEntry(entry: LessonEntryRow): LessonView {
+  const lesson = firstRelation(entry.lessons);
+  const timetable = firstRelation(lesson?.timetables ?? null);
+  const classSubject = firstRelation(timetable?.class_subjects ?? null);
+  const schoolClass = firstRelation(classSubject?.classes ?? null);
+  const subject = firstRelation(classSubject?.subjects ?? null);
+  const teacher = firstRelation(classSubject?.teachers ?? null);
+
+  return {
+    id: entry.id,
+    title: lesson?.title ?? "Cours sans titre",
+    description: lesson?.description ?? "",
+    workText: entry.work_text ?? "",
+    note: entry.note ?? "",
+    homeworkDueDate: entry.homework_due_date,
+    isPublished: lesson?.is_published ?? false,
+    publishedAt: lesson?.published_at ?? null,
+    className: schoolClass?.name ?? "Classe inconnue",
+    classLevel: schoolClass?.level ?? "",
+    subjectName: subject?.name ?? "Matière inconnue",
+    subjectShortName: subject?.short_name ?? "",
+    subjectColor: subject?.color ?? "#64748b",
+    teacherName: teacher
+      ? `${teacher.first_name} ${teacher.last_name}`.trim()
+      : "Enseignant inconnu",
+    dayOfWeek: timetable?.day_of_week ?? null,
+    startsAt: timetable?.starts_at ?? "",
+    endsAt: timetable?.ends_at ?? "",
+    room: timetable?.room ?? "—",
+    academicYear: timetable?.academic_year ?? "",
+  };
+}
 
 export default function LessonsPage() {
-  const [query, setQuery] = useState("");
-  const [statutFilter, setStatutFilter] = useState<"TOUS" | LessonStatus>("TOUS");
-  const [classeFilter, setClasseFilter] = useState("TOUTES");
-  const [rows, setRows] = useState<Lesson[]>(SAMPLE_LESSONS);
+  const [lessons, setLessons] = useState<LessonView[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [search, setSearch] = useState("");
+  const [classFilter, setClassFilter] = useState("ALL");
+  const [publicationFilter, setPublicationFilter] = useState<
+    "ALL" | "PUBLISHED" | "DRAFT"
+  >("ALL");
+
+  const loadLessons = useCallback(async () => {
+    setLoading(true);
+    setErrorMessage(null);
+
+    const { data, error } = await supabase
+      .from("lesson_entries")
+      .select(`
+        id,
+        lesson_id,
+        work_text,
+        note,
+        homework_due_date,
+        created_at,
+        updated_at,
+        lessons!inner (
+          id,
+          title,
+          description,
+          is_published,
+          published_at,
+          created_at,
+          updated_at,
+          timetables!inner (
+            day_of_week,
+            starts_at,
+            ends_at,
+            room,
+            academic_year,
+            class_subjects!inner (
+              classes!inner (
+                name,
+                level
+              ),
+              subjects!inner (
+                name,
+                short_name,
+                color
+              ),
+              teachers!inner (
+                first_name,
+                last_name
+              )
+            )
+          )
+        )
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Erreur de chargement du cahier de texte :", error);
+      setLessons([]);
+      setErrorMessage(
+        `Impossible de charger le cahier de texte : ${error.message}`,
+      );
+      setLoading(false);
+      return;
+    }
+
+    const rows = (data ?? []) as unknown as LessonEntryRow[];
+    setLessons(rows.map(normalizeEntry));
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void loadLessons();
+  }, [loadLessons]);
 
   const classes = useMemo(
-    () => ["TOUTES", ...Array.from(new Set(SAMPLE_LESSONS.map((l) => l.classe)))],
-    []
+    () =>
+      Array.from(new Set(lessons.map((lesson) => lesson.className))).sort(
+        (a, b) => a.localeCompare(b, "fr"),
+      ),
+    [lessons],
   );
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return rows.filter((r) => {
-      const textMatch =
-        q.length === 0 ||
-        r.matiere.toLowerCase().includes(q) ||
-        r.enseignant.toLowerCase().includes(q) ||
-        r.classe.toLowerCase().includes(q) ||
-        r.description.toLowerCase().includes(q);
+  const filteredLessons = useMemo(() => {
+    const normalizedSearch = search.trim().toLocaleLowerCase("fr");
 
-      const statutMatch = statutFilter === "TOUS" ? true : r.statut === statutFilter;
-      const classeMatch = classeFilter === "TOUTES" ? true : r.classe === classeFilter;
-      return textMatch && statutMatch && classeMatch;
+    return lessons.filter((lesson) => {
+      const searchableText = [
+        lesson.title,
+        lesson.description,
+        lesson.workText,
+        lesson.note,
+        lesson.className,
+        lesson.classLevel,
+        lesson.subjectName,
+        lesson.subjectShortName,
+        lesson.teacherName,
+        lesson.room,
+      ]
+        .join(" ")
+        .toLocaleLowerCase("fr");
+
+      const matchesSearch =
+        normalizedSearch === "" ||
+        searchableText.includes(normalizedSearch);
+
+      const matchesClass =
+        classFilter === "ALL" || lesson.className === classFilter;
+
+      const matchesPublication =
+        publicationFilter === "ALL" ||
+        (publicationFilter === "PUBLISHED" && lesson.isPublished) ||
+        (publicationFilter === "DRAFT" && !lesson.isPublished);
+
+      return matchesSearch && matchesClass && matchesPublication;
     });
-  }, [rows, query, statutFilter, classeFilter]);
+  }, [lessons, search, classFilter, publicationFilter]);
 
-  const total = rows.length;
-  const todo = rows.filter((r) => r.statut === "A_FAIRE").length;
-  const encours = rows.filter((r) => r.statut === "EN_COURS").length;
-  const done = rows.filter((r) => r.statut === "TERMINE").length;
+  const publishedCount = lessons.filter(
+    (lesson) => lesson.isPublished,
+  ).length;
 
-  // 👉 Remplace par tes appels API réels
-  const handleDelete = (id: string) => {
-    const ok = window.confirm("Supprimer ce cours ?");
-    if (!ok) return;
-    setRows((prev) => prev.filter((r) => r.id !== id));
-  };
+  const draftCount = lessons.length - publishedCount;
 
-  const handleStatus = (id: string, next: LessonStatus) => {
-    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, statut: next } : r)));
-  };
+  const homeworkCount = lessons.filter(
+    (lesson) => lesson.homeworkDueDate !== null,
+  ).length;
 
   return (
-    <section className="admin-lessons">
+    <main className="admin-lessons">
       <header className="admin-top">
         <div>
           <p className="kicker">Administration</p>
-          <h1>Cahier de texte — Gestion des cours</h1>
-          <p className="subtitle">Vue d’ensemble complète pour valider et piloter les enregistrements.</p>
+          <h1>Cahier de texte</h1>
+          <p className="subtitle">
+            Consultez les cours, les travaux réalisés et les devoirs.
+          </p>
         </div>
-        <button className="btn primary">+ Nouveau cours</button>
+
+        <button
+          className="btn primary"
+          type="button"
+          onClick={() => void loadLessons()}
+          disabled={loading}
+        >
+          {loading ? "Chargement…" : "Actualiser"}
+        </button>
       </header>
 
-      <div className="admin-stats">
-        <article className="stat"><span>Total</span><strong>{total}</strong></article>
-        <article className="stat"><span>À faire</span><strong>{todo}</strong></article>
-        <article className="stat"><span>En cours</span><strong>{encours}</strong></article>
-        <article className="stat"><span>Terminés</span><strong>{done}</strong></article>
-      </div>
+      <section className="admin-stats" aria-label="Statistiques">
+        <article className="stat">
+          <span>Total des entrées</span>
+          <strong>{lessons.length}</strong>
+        </article>
 
-      <div className="admin-filters">
+        <article className="stat">
+          <span>Publiées</span>
+          <strong>{publishedCount}</strong>
+        </article>
+
+        <article className="stat">
+          <span>Brouillons</span>
+          <strong>{draftCount}</strong>
+        </article>
+
+        <article className="stat">
+          <span>Avec devoir</span>
+          <strong>{homeworkCount}</strong>
+        </article>
+      </section>
+
+      <section className="admin-filters" aria-label="Filtres">
         <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Rechercher (matière, enseignant, classe, description)"
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Rechercher un cours, une classe ou un enseignant…"
+          aria-label="Rechercher"
         />
-        <select value={classeFilter} onChange={(e) => setClasseFilter(e.target.value)}>
-          {classes.map((c) => (
-            <option key={c} value={c}>{c}</option>
+
+        <select
+          value={classFilter}
+          onChange={(event) => setClassFilter(event.target.value)}
+          aria-label="Filtrer par classe"
+        >
+          <option value="ALL">Toutes les classes</option>
+
+          {classes.map((className) => (
+            <option key={className} value={className}>
+              {className}
+            </option>
           ))}
         </select>
-        <select value={statutFilter} onChange={(e) => setStatutFilter(e.target.value as "TOUS" | LessonStatus)}>
-          <option value="TOUS">Tous statuts</option>
-          <option value="A_FAIRE">À faire</option>
-          <option value="EN_COURS">En cours</option>
-          <option value="TERMINE">Terminé</option>
-        </select>
-      </div>
 
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Heure</th>
-              <th>Matière</th>
-              <th>Classe</th>
-              <th>Enseignant</th>
-              <th>Durée</th>
-              <th>Statut</th>
-              <th className="actions-col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((lesson) => (
-              <tr key={lesson.id}>
-                <td>{formatDateFR(lesson.date)}</td>
-                <td>{lesson.heure}</td>
-                <td>{lesson.matiere}</td>
-                <td>{lesson.classe}</td>
-                <td>{lesson.enseignant}</td>
-                <td>{lesson.duree} min</td>
-                <td>
-                  <span className={statusClass[lesson.statut]}>{statusLabel[lesson.statut]}</span>
-                </td>
-                <td>
-                  <div className="row-actions">
-                    <button className="btn tiny">Voir</button>
-                    <button className="btn tiny">Modifier</button>
-                    <button className="btn tiny">Rapport</button>
-                    <button className="btn tiny danger" onClick={() => handleDelete(lesson.id)}>
-                      Supprimer
-                    </button>
-                    <select
-                      aria-label="Changer le statut"
-                      value={lesson.statut}
-                      onChange={(e) =>
-                        handleStatus(lesson.id, e.target.value as LessonStatus)
+        <select
+          value={publicationFilter}
+          onChange={(event) =>
+            setPublicationFilter(
+              event.target.value as "ALL" | "PUBLISHED" | "DRAFT",
+            )
+          }
+          aria-label="Filtrer par publication"
+        >
+          <option value="ALL">Tous les statuts</option>
+          <option value="PUBLISHED">Publiés</option>
+          <option value="DRAFT">Brouillons</option>
+        </select>
+      </section>
+
+      {errorMessage && (
+        <section className="error-box" role="alert">
+          <p>{errorMessage}</p>
+
+          <button
+            className="btn"
+            type="button"
+            onClick={() => void loadLessons()}
+          >
+            Réessayer
+          </button>
+        </section>
+      )}
+
+      {loading && !errorMessage && (
+        <p className="subtitle">Chargement du cahier de texte…</p>
+      )}
+
+      {!loading && !errorMessage && (
+        <section className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Jour et horaire</th>
+                <th>Matière</th>
+                <th>Classe</th>
+                <th>Enseignant</th>
+                <th>Cours et travail réalisé</th>
+                <th>Devoir</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredLessons.map((lesson) => (
+                <tr key={lesson.id}>
+                  <td>
+                    <strong>
+                      {lesson.dayOfWeek
+                        ? DAY_LABELS[lesson.dayOfWeek]
+                        : "Jour inconnu"}
+                    </strong>
+                    <br />
+                    <span>
+                      {formatTime(lesson.startsAt)} –{" "}
+                      {formatTime(lesson.endsAt)}
+                    </span>
+                    <br />
+                    <small>Salle : {lesson.room}</small>
+                  </td>
+
+                  <td>
+                    <span
+                      className="subject-dot"
+                      style={{ backgroundColor: lesson.subjectColor }}
+                      aria-hidden="true"
+                    />
+                    <strong>{lesson.subjectName}</strong>
+                  </td>
+
+                  <td>
+                    <strong>{lesson.className}</strong>
+                    {lesson.classLevel && (
+                      <>
+                        <br />
+                        <small>{lesson.classLevel}</small>
+                      </>
+                    )}
+                  </td>
+
+                  <td>{lesson.teacherName}</td>
+
+                  <td>
+                    <strong>{lesson.title}</strong>
+                    {lesson.description && <p>{lesson.description}</p>}
+                    {lesson.workText && (
+                      <p>
+                        <b>Travail :</b> {lesson.workText}
+                      </p>
+                    )}
+                    {lesson.note && (
+                      <p>
+                        <b>Note :</b> {lesson.note}
+                      </p>
+                    )}
+                  </td>
+
+                  <td>{formatDate(lesson.homeworkDueDate)}</td>
+
+                  <td>
+                    <span
+                      className={
+                        lesson.isPublished
+                          ? "status done"
+                          : "status todo"
                       }
                     >
-                      <option value="A_FAIRE">À faire</option>
-                      <option value="EN_COURS">En cours</option>
-                      <option value="TERMINE">Terminé</option>
-                    </select>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={8} className="empty">Aucun cours trouvé.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </section>
+                      {lesson.isPublished ? "Publié" : "Brouillon"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+
+              {filteredLessons.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="empty">
+                    {lessons.length === 0
+                      ? "Aucune entrée n’est enregistrée dans le cahier de texte."
+                      : "Aucune entrée ne correspond aux filtres sélectionnés."}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </section>
+      )}
+    </main>
   );
 }
