@@ -95,3 +95,61 @@
 .done { background: #16a34a; }
 
 .empty { color: #64748b; text-align: center; padding: 18px; }
+.subject-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.error-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+}
+
+.error-box p {
+  margin: 0;
+}
+
+.admin-table td p {
+  margin: 6px 0 0;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.admin-table td small {
+  color: #64748b;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+@media (max-width: 760px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+
+  .admin-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  }
+
+  .error-box {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
