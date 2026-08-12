@@ -79,6 +79,10 @@ type LessonView = {
   academicYear: string;
 };
 
+type LessonsPageProps = {
+  onBack: () => void;
+};
+
 const DAY_LABELS: Record<number, string> = {
   1: "Lundi",
   2: "Mardi",
@@ -146,7 +150,9 @@ function normalizeEntry(entry: LessonEntryRow): LessonView {
   };
 }
 
-export default function LessonsPage() {
+export default function LessonsPage({
+  onBack,
+}: LessonsPageProps) {
   const [lessons, setLessons] = useState<LessonView[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -206,7 +212,11 @@ export default function LessonsPage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Erreur de chargement du cahier de texte :", error);
+      console.error(
+        "Erreur de chargement du cahier de texte :",
+        error,
+      );
+
       setLessons([]);
       setErrorMessage(
         `Impossible de charger le cahier de texte : ${error.message}`,
@@ -216,6 +226,7 @@ export default function LessonsPage() {
     }
 
     const rows = (data ?? []) as unknown as LessonEntryRow[];
+
     setLessons(rows.map(normalizeEntry));
     setLoading(false);
   }, []);
@@ -226,14 +237,16 @@ export default function LessonsPage() {
 
   const classes = useMemo(
     () =>
-      Array.from(new Set(lessons.map((lesson) => lesson.className))).sort(
-        (a, b) => a.localeCompare(b, "fr"),
-      ),
+      Array.from(
+        new Set(lessons.map((lesson) => lesson.className)),
+      ).sort((a, b) => a.localeCompare(b, "fr")),
     [lessons],
   );
 
   const filteredLessons = useMemo(() => {
-    const normalizedSearch = search.trim().toLocaleLowerCase("fr");
+    const normalizedSearch = search
+      .trim()
+      .toLocaleLowerCase("fr");
 
     return lessons.filter((lesson) => {
       const searchableText = [
@@ -256,16 +269,28 @@ export default function LessonsPage() {
         searchableText.includes(normalizedSearch);
 
       const matchesClass =
-        classFilter === "ALL" || lesson.className === classFilter;
+        classFilter === "ALL" ||
+        lesson.className === classFilter;
 
       const matchesPublication =
         publicationFilter === "ALL" ||
-        (publicationFilter === "PUBLISHED" && lesson.isPublished) ||
-        (publicationFilter === "DRAFT" && !lesson.isPublished);
+        (publicationFilter === "PUBLISHED" &&
+          lesson.isPublished) ||
+        (publicationFilter === "DRAFT" &&
+          !lesson.isPublished);
 
-      return matchesSearch && matchesClass && matchesPublication;
+      return (
+        matchesSearch &&
+        matchesClass &&
+        matchesPublication
+      );
     });
-  }, [lessons, search, classFilter, publicationFilter]);
+  }, [
+    lessons,
+    search,
+    classFilter,
+    publicationFilter,
+  ]);
 
   const publishedCount = lessons.filter(
     (lesson) => lesson.isPublished,
@@ -280,9 +305,19 @@ export default function LessonsPage() {
   return (
     <main className="admin-lessons">
       <header className="admin-top">
+        <button
+          className="btn"
+          type="button"
+          onClick={onBack}
+        >
+          ← Retour
+        </button>
+
         <div>
           <p className="kicker">Administration</p>
+
           <h1>Cahier de texte</h1>
+
           <p className="subtitle">
             Consultez les cours, les travaux réalisés et les devoirs.
           </p>
@@ -298,7 +333,10 @@ export default function LessonsPage() {
         </button>
       </header>
 
-      <section className="admin-stats" aria-label="Statistiques">
+      <section
+        className="admin-stats"
+        aria-label="Statistiques"
+      >
         <article className="stat">
           <span>Total des entrées</span>
           <strong>{lessons.length}</strong>
@@ -320,7 +358,10 @@ export default function LessonsPage() {
         </article>
       </section>
 
-      <section className="admin-filters" aria-label="Filtres">
+      <section
+        className="admin-filters"
+        aria-label="Filtres"
+      >
         <input
           type="search"
           value={search}
@@ -331,7 +372,9 @@ export default function LessonsPage() {
 
         <select
           value={classFilter}
-          onChange={(event) => setClassFilter(event.target.value)}
+          onChange={(event) =>
+            setClassFilter(event.target.value)
+          }
           aria-label="Filtrer par classe"
         >
           <option value="ALL">Toutes les classes</option>
@@ -347,7 +390,10 @@ export default function LessonsPage() {
           value={publicationFilter}
           onChange={(event) =>
             setPublicationFilter(
-              event.target.value as "ALL" | "PUBLISHED" | "DRAFT",
+              event.target.value as
+                | "ALL"
+                | "PUBLISHED"
+                | "DRAFT",
             )
           }
           aria-label="Filtrer par publication"
@@ -359,7 +405,10 @@ export default function LessonsPage() {
       </section>
 
       {errorMessage && (
-        <section className="error-box" role="alert">
+        <section
+          className="error-box"
+          role="alert"
+        >
           <p>{errorMessage}</p>
 
           <button
@@ -373,7 +422,9 @@ export default function LessonsPage() {
       )}
 
       {loading && !errorMessage && (
-        <p className="subtitle">Chargement du cahier de texte…</p>
+        <p className="subtitle">
+          Chargement du cahier de texte…
+        </p>
       )}
 
       {!loading && !errorMessage && (
@@ -400,26 +451,39 @@ export default function LessonsPage() {
                         ? DAY_LABELS[lesson.dayOfWeek]
                         : "Jour inconnu"}
                     </strong>
+
                     <br />
+
                     <span>
                       {formatTime(lesson.startsAt)} –{" "}
                       {formatTime(lesson.endsAt)}
                     </span>
+
                     <br />
-                    <small>Salle : {lesson.room}</small>
+
+                    <small>
+                      Salle : {lesson.room}
+                    </small>
                   </td>
 
                   <td>
                     <span
                       className="subject-dot"
-                      style={{ backgroundColor: lesson.subjectColor }}
+                      style={{
+                        backgroundColor:
+                          lesson.subjectColor,
+                      }}
                       aria-hidden="true"
                     />
-                    <strong>{lesson.subjectName}</strong>
+
+                    <strong>
+                      {lesson.subjectName}
+                    </strong>
                   </td>
 
                   <td>
                     <strong>{lesson.className}</strong>
+
                     {lesson.classLevel && (
                       <>
                         <br />
@@ -432,20 +496,29 @@ export default function LessonsPage() {
 
                   <td>
                     <strong>{lesson.title}</strong>
-                    {lesson.description && <p>{lesson.description}</p>}
+
+                    {lesson.description && (
+                      <p>{lesson.description}</p>
+                    )}
+
                     {lesson.workText && (
                       <p>
-                        <b>Travail :</b> {lesson.workText}
+                        <b>Travail :</b>{" "}
+                        {lesson.workText}
                       </p>
                     )}
+
                     {lesson.note && (
                       <p>
-                        <b>Note :</b> {lesson.note}
+                        <b>Note :</b>{" "}
+                        {lesson.note}
                       </p>
                     )}
                   </td>
 
-                  <td>{formatDate(lesson.homeworkDueDate)}</td>
+                  <td>
+                    {formatDate(lesson.homeworkDueDate)}
+                  </td>
 
                   <td>
                     <span
@@ -455,7 +528,9 @@ export default function LessonsPage() {
                           : "status todo"
                       }
                     >
-                      {lesson.isPublished ? "Publié" : "Brouillon"}
+                      {lesson.isPublished
+                        ? "Publié"
+                        : "Brouillon"}
                     </span>
                   </td>
                 </tr>
@@ -463,7 +538,10 @@ export default function LessonsPage() {
 
               {filteredLessons.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="empty">
+                  <td
+                    colSpan={7}
+                    className="empty"
+                  >
                     {lessons.length === 0
                       ? "Aucune entrée n’est enregistrée dans le cahier de texte."
                       : "Aucune entrée ne correspond aux filtres sélectionnés."}
