@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 import { usernameToInternalEmail } from '../lib/auth'
 import { FirstLoginPage } from './FirstLoginPage'
 import { AdminDashboardPage } from './AdminDashboardPage'
-
+import './LoginPage.css'
 
 type Profile = {
   username: string
@@ -24,8 +24,10 @@ type Profile = {
 export function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+
   const [profile, setProfile] =
     useState<Profile | null>(null)
+
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -123,87 +125,179 @@ export function LoginPage() {
   }
 
   if (profile) {
-  return (
-    <AdminDashboardPage
-      firstName={profile.first_name}
-      lastName={profile.last_name}
-      onSignOut={() => {
-        setProfile(null)
-        setUsername('')
-        setPassword('')
-      }}
-    />
-  )
-}
+    return (
+      <AdminDashboardPage
+        firstName={profile.first_name}
+        lastName={profile.last_name}
+        onSignOut={() => {
+          setProfile(null)
+          setUsername('')
+          setPassword('')
+        }}
+      />
+    )
+  }
 
   return (
-    <main>
-      <section>
-        <header>
-          <p>Ensemble scolaire</p>
-          <h1>Saint Georges Coccinet</h1>
-          <p>Espace numérique de travail</p>
-        </header>
+    <main className="login-page">
+      <section className="login-shell">
+        <aside className="login-presentation">
+          <div className="login-brand">
+            <span
+              className="login-brand-mark"
+              aria-hidden="true"
+            >
+              SG
+            </span>
 
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="username">
-              Identifiant
-            </label>
-
-            <input
-              id="username"
-              name="username"
-              type="text"
-              autoComplete="username"
-              value={username}
-              onChange={(event) =>
-                setUsername(event.target.value)
-              }
-              placeholder="Exemple : admin"
-              required
-            />
+            <div>
+              <p>Ensemble scolaire</p>
+              <strong>Saint Georges Coccinet</strong>
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="password">
-              Mot de passe
-            </label>
-
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) =>
-                setPassword(event.target.value)
-              }
-              required
-            />
-          </div>
-
-          {error && (
-            <p role="alert">
-              {error}
+          <div className="login-presentation-content">
+            <p className="login-kicker">
+              Espace numérique de travail
             </p>
-          )}
 
-          <button
-            type="submit"
-            disabled={isLoading}
-          >
-            {isLoading
-              ? 'Connexion en cours...'
-              : 'Se connecter'}
-          </button>
-        </form>
+            <h1>
+              Bienvenue dans votre environnement scolaire
+            </h1>
 
-        <footer>
-          <p>
-            Plateforme fictive réservée au school RP.
+            <p>
+              Accédez aux services de l’établissement depuis
+              une interface unique, claire et sécurisée.
+            </p>
+
+            <ul className="login-features">
+              <li>
+                <span aria-hidden="true">✓</span>
+                Gestion des classes et des élèves
+              </li>
+
+              <li>
+                <span aria-hidden="true">✓</span>
+                Emplois du temps et affectations
+              </li>
+
+              <li>
+                <span aria-hidden="true">✓</span>
+                Cahier de texte et suivi pédagogique
+              </li>
+            </ul>
+          </div>
+
+          <p className="login-presentation-footer">
+            Ensemble, construisons la réussite.
           </p>
-        </footer>
+        </aside>
+
+        <div className="login-form-panel">
+          <div className="login-form-container">
+            <header className="login-form-header">
+              <span className="login-mobile-mark">
+                SG
+              </span>
+
+              <p className="login-kicker">
+                Accès sécurisé
+              </p>
+
+              <h2>Connexion</h2>
+
+              <p>
+                Saisissez vos identifiants pour accéder à
+                votre espace.
+              </p>
+            </header>
+
+            <form
+              className="login-form"
+              onSubmit={handleSubmit}
+            >
+              <label htmlFor="username">
+                Identifiant
+
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  value={username}
+                  onChange={(event) => {
+                    setUsername(event.target.value)
+
+                    if (error) {
+                      setError('')
+                    }
+                  }}
+                  placeholder="Exemple : admin"
+                  disabled={isLoading}
+                  required
+                />
+              </label>
+
+              <label htmlFor="password">
+                Mot de passe
+
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) => {
+                    setPassword(event.target.value)
+
+                    if (error) {
+                      setError('')
+                    }
+                  }}
+                  placeholder="Votre mot de passe"
+                  disabled={isLoading}
+                  required
+                />
+              </label>
+
+              {error && (
+                <div
+                  className="login-error"
+                  role="alert"
+                >
+                  <span aria-hidden="true">!</span>
+                  <p>{error}</p>
+                </div>
+              )}
+
+              <button
+                className="login-submit"
+                type="submit"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span
+                      className="login-spinner"
+                      aria-hidden="true"
+                    />
+                    Connexion en cours…
+                  </>
+                ) : (
+                  'Se connecter'
+                )}
+              </button>
+            </form>
+
+            <footer className="login-form-footer">
+              <p>
+                Plateforme fictive réservée au school RP.
+              </p>
+            </footer>
+          </div>
+        </div>
       </section>
     </main>
   )
