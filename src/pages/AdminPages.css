@@ -414,3 +414,22 @@
     flex-direction: column;
   }
 }
+/* Liens dans les tableaux */
+
+.admin-email-link {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.admin-email-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.admin-email-link:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid rgba(37, 99, 235, 0.24);
+  outline-offset: 3px;
+}

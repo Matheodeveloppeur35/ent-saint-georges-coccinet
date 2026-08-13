@@ -4,6 +4,7 @@ import {
   type FormEvent,
 } from 'react'
 import { supabase } from '../lib/supabase'
+import './AdminPages.css'
 
 type Subject = {
   id: string
@@ -36,6 +37,7 @@ export function TeachersPage({
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [subjectId, setSubjectId] = useState('')
+
   const [isLoading, setIsLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState('')
@@ -49,8 +51,7 @@ export function TeachersPage({
       await Promise.all([
         supabase
           .from('teachers')
-          .select(
-            `
+          .select(`
             id,
             employee_number,
             first_name,
@@ -62,8 +63,7 @@ export function TeachersPage({
               name,
               short_name
             )
-          `,
-          )
+          `)
           .order('last_name')
           .order('first_name'),
 
@@ -76,7 +76,7 @@ export function TeachersPage({
 
     if (teachersResult.error || subjectsResult.error) {
       setError(
-        'Les données professeurs n’ont pas pu être chargées.',
+        'Les données des professeurs n’ont pas pu être chargées.',
       )
     } else {
       setTeachers(teachersResult.data as Teacher[])
@@ -87,7 +87,7 @@ export function TeachersPage({
   }
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [])
 
   async function handleCreateTeacher(
@@ -143,9 +143,11 @@ export function TeachersPage({
       setLastName('')
       setEmail('')
       setSubjectId('')
+
       setSuccess(
         'Le profil professeur a été créé avec succès.',
       )
+
       await loadData()
     }
 
@@ -153,172 +155,284 @@ export function TeachersPage({
   }
 
   return (
-    <main>
-      <header>
+    <main className="admin-page">
+      <header className="admin-page-header">
         <div>
           <p>Administration</p>
+
           <h1>Gestion des professeurs</h1>
+
+          <p>
+            Créez et consultez les profils des enseignants.
+          </p>
         </div>
 
-        <button type="button" onClick={onBack}>
-          Retour au tableau de bord
+        <button
+          className="admin-button"
+          type="button"
+          onClick={onBack}
+        >
+          ← Retour au tableau de bord
         </button>
       </header>
 
-      <section>
-        <h2>Créer un professeur</h2>
+      <div className="admin-page-content">
+        <section className="admin-card">
+          <h2>Créer un professeur</h2>
 
-        <form onSubmit={handleCreateTeacher}>
-          <div>
+          <form
+            className="admin-form"
+            onSubmit={handleCreateTeacher}
+          >
             <label htmlFor="teacher-employee-number">
               Numéro enseignant
+
+              <input
+                id="teacher-employee-number"
+                type="text"
+                value={employeeNumber}
+                onChange={(event) =>
+                  setEmployeeNumber(event.target.value)
+                }
+                placeholder="Exemple : ENS-0003"
+                minLength={3}
+                maxLength={30}
+                required
+              />
             </label>
 
-            <input
-              id="teacher-employee-number"
-              type="text"
-              value={employeeNumber}
-              onChange={(event) =>
-                setEmployeeNumber(event.target.value)
-              }
-              placeholder="Exemple : ENS-0003"
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="teacher-first-name">
               Prénom
+
+              <input
+                id="teacher-first-name"
+                type="text"
+                value={firstName}
+                onChange={(event) =>
+                  setFirstName(event.target.value)
+                }
+                placeholder="Exemple : Claire"
+                maxLength={80}
+                required
+              />
             </label>
 
-            <input
-              id="teacher-first-name"
-              type="text"
-              value={firstName}
-              onChange={(event) =>
-                setFirstName(event.target.value)
-              }
-              maxLength={80}
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="teacher-last-name">
               Nom
+
+              <input
+                id="teacher-last-name"
+                type="text"
+                value={lastName}
+                onChange={(event) =>
+                  setLastName(event.target.value)
+                }
+                placeholder="Exemple : Durand"
+                maxLength={80}
+                required
+              />
             </label>
 
-            <input
-              id="teacher-last-name"
-              type="text"
-              value={lastName}
-              onChange={(event) =>
-                setLastName(event.target.value)
-              }
-              maxLength={80}
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="teacher-email">
               E-mail (optionnel)
+
+              <input
+                id="teacher-email"
+                type="email"
+                value={email}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
+                placeholder="exemple@sgc-rp.edu"
+              />
             </label>
 
-            <input
-              id="teacher-email"
-              type="email"
-              value={email}
-              onChange={(event) =>
-                setEmail(event.target.value)
-              }
-              placeholder="exemple@sgc-rp.edu"
-            />
-          </div>
-
-          <div>
             <label htmlFor="teacher-subject">
               Matière principale
+
+              <select
+                id="teacher-subject"
+                value={subjectId}
+                onChange={(event) =>
+                  setSubjectId(event.target.value)
+                }
+              >
+                <option value="">
+                  Aucune matière attribuée
+                </option>
+
+                {subjects.map((subject) => (
+                  <option
+                    key={subject.id}
+                    value={subject.id}
+                  >
+                    {subject.name} ({subject.short_name})
+                  </option>
+                ))}
+              </select>
             </label>
 
-            <select
-              id="teacher-subject"
-              value={subjectId}
-              onChange={(event) =>
-                setSubjectId(event.target.value)
-              }
-            >
-              <option value="">
-                Aucune matière attribuée
-              </option>
+            <div className="full-width">
+              <button
+                className="admin-button primary"
+                type="submit"
+                disabled={isCreating}
+              >
+                {isCreating
+                  ? 'Création en cours…'
+                  : 'Créer le professeur'}
+              </button>
+            </div>
+          </form>
 
-              {subjects.map((subject) => (
-                <option
-                  key={subject.id}
-                  value={subject.id}
-                >
-                  {subject.name} ({subject.short_name})
-                </option>
-              ))}
-            </select>
+          {success && (
+            <p
+              className="admin-message success"
+              role="status"
+            >
+              {success}
+            </p>
+          )}
+
+          {error && (
+            <p
+              className="admin-message error"
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
+        </section>
+
+        <section className="admin-card">
+          <div className="admin-section-heading">
+            <div>
+              <h2>Professeurs enregistrés</h2>
+
+              {!isLoading && (
+                <p>
+                  {teachers.length}{' '}
+                  {teachers.length > 1
+                    ? 'professeurs enregistrés'
+                    : 'professeur enregistré'}
+                </p>
+              )}
+            </div>
+
+            <button
+              className="admin-button"
+              type="button"
+              onClick={() => void loadData()}
+              disabled={isLoading}
+            >
+              {isLoading
+                ? 'Chargement…'
+                : 'Actualiser'}
+            </button>
           </div>
 
-          <button type="submit" disabled={isCreating}>
-            {isCreating
-              ? 'Création en cours...'
-              : 'Créer le professeur'}
-          </button>
-        </form>
+          {isLoading && (
+            <p className="admin-empty">
+              Chargement des professeurs…
+            </p>
+          )}
 
-        {success && <p role="status">{success}</p>}
-        {error && <p role="alert">{error}</p>}
-      </section>
+          {!isLoading && teachers.length === 0 && (
+            <p className="admin-empty">
+              Aucun professeur n’est enregistré.
+            </p>
+          )}
 
-      <section>
-        <h2>Professeurs enregistrés</h2>
+          {!isLoading && teachers.length > 0 && (
+            <div className="admin-table-wrapper">
+              <table className="admin-table-common">
+                <thead>
+                  <tr>
+                    <th>Numéro</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>E-mail</th>
+                    <th>Matière</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
 
-        {isLoading && <p>Chargement des professeurs...</p>}
+                <tbody>
+                  {teachers.map((teacher) => {
+                    const teacherSubject =
+                      teacher.subjects?.[0]
 
-        {!isLoading && teachers.length === 0 && (
-          <p>Aucun professeur n’est enregistré.</p>
-        )}
+                    return (
+                      <tr key={teacher.id}>
+                        <td>
+                          <span className="admin-badge blue">
+                            {teacher.employee_number}
+                          </span>
+                        </td>
 
-        {!isLoading && teachers.length > 0 && (
-          <table>
-            <thead>
-              <tr>
-                <th>Numéro</th>
-                <th>Nom</th>
-                <th>Prénom</th>
-                <th>E-mail</th>
-                <th>Matière</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
+                        <td>
+                          <strong>
+                            {teacher.last_name}
+                          </strong>
+                        </td>
 
-            <tbody>
-              {teachers.map((teacher) => (
-                <tr key={teacher.id}>
-                  <td>{teacher.employee_number}</td>
-                  <td>{teacher.last_name}</td>
-                  <td>{teacher.first_name}</td>
-                  <td>{teacher.email || '—'}</td>
-                  <td>
-                    {teacher.subjects?.[0]
-  ? `${teacher.subjects[0].name} (${teacher.subjects[0].short_name})`
-  : 'Aucune matière'}
-                  </td>
-                  <td>
-                    {teacher.is_active
-                      ? 'Actif'
-                      : 'Archivé'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+                        <td>{teacher.first_name}</td>
+
+                        <td>
+                          {teacher.email ? (
+                            <a
+                              className="admin-email-link"
+                              href={`mailto:${teacher.email}`}
+                            >
+                              {teacher.email}
+                            </a>
+                          ) : (
+                            <span className="admin-muted">
+                              Non renseigné
+                            </span>
+                          )}
+                        </td>
+
+                        <td>
+                          {teacherSubject ? (
+                            <div className="admin-cell-stack">
+                              <strong>
+                                {teacherSubject.name}
+                              </strong>
+
+                              <small>
+                                {teacherSubject.short_name}
+                              </small>
+                            </div>
+                          ) : (
+                            <span className="admin-badge orange">
+                              Aucune matière
+                            </span>
+                          )}
+                        </td>
+
+                        <td>
+                          <span
+                            className={
+                              teacher.is_active
+                                ? 'admin-badge green'
+                                : 'admin-badge orange'
+                            }
+                          >
+                            {teacher.is_active
+                              ? 'Actif'
+                              : 'Archivé'}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
     </main>
   )
 }
