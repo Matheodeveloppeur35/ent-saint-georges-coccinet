@@ -440,3 +440,77 @@
   color: #92400e;
   background: #fffbeb;
 }
+/* =========================================================
+   Emploi du temps
+   ========================================================= */
+
+.admin-card-description {
+  margin: -8px 0 20px;
+  color: #667085;
+  line-height: 1.6;
+}
+
+.admin-checkbox {
+  display: flex !important;
+  min-height: 44px;
+  flex-direction: row !important;
+  align-items: center;
+  align-self: end;
+  gap: 10px !important;
+  padding: 10px 13px;
+  border: 1px solid #d8e0ee;
+  border-radius: 11px;
+  background: #fbfcfe;
+  cursor: pointer;
+}
+
+.admin-checkbox input {
+  width: 18px !important;
+  min-height: 18px !important;
+  height: 18px;
+  margin: 0;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.admin-checkbox span {
+  color: #344054;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.admin-time {
+  display: inline-flex;
+  min-width: max-content;
+  padding: 5px 9px;
+  border-radius: 8px;
+  color: #1d4ed8;
+  background: #eff6ff;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.admin-timetable-table {
+  min-width: 1200px;
+}
+
+.admin-row-cancelled {
+  background: #fff7f7;
+}
+
+.admin-row-cancelled:hover {
+  background: #fff1f2 !important;
+}
+
+.admin-cancelled-text {
+  color: #b91c1c;
+}
+
+.admin-note {
+  display: block;
+  min-width: 180px;
+  max-width: 360px;
+  color: #475467;
+  line-height: 1.5;
+  white-space: normal;
+}
