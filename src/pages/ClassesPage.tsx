@@ -4,6 +4,7 @@ import {
   type FormEvent,
 } from 'react'
 import { supabase } from '../lib/supabase'
+import './AdminPages.css'
 
 type SchoolClass = {
   id: string
@@ -48,7 +49,7 @@ export function ClassesPage({
 
     if (classesError) {
       setError(
-        'Les classes n’ont pas pu être chargées.',
+        "Les classes n'ont pas pu être chargées.",
       )
     } else {
       setClasses(data as SchoolClass[])
@@ -58,7 +59,7 @@ export function ClassesPage({
   }
 
   useEffect(() => {
-    loadClasses()
+    void loadClasses()
   }, [])
 
   async function handleCreateClass(
@@ -108,7 +109,7 @@ export function ClassesPage({
         )
       } else {
         setError(
-          'La classe n’a pas pu être créée.',
+          "La classe n'a pas pu être créée.",
         )
       }
     } else {
@@ -124,142 +125,182 @@ export function ClassesPage({
 
       setName('')
       setLevel('')
-      setSuccess('La classe a été créée avec succès.')
+      setSuccess(
+        'La classe a été créée avec succès.',
+      )
     }
 
     setIsCreating(false)
   }
 
   return (
-    <main>
-      <header>
+    <main className="admin-page">
+      <header className="admin-page-header">
         <div>
           <p>Administration</p>
           <h1>Gestion des classes</h1>
+          <p>
+            Créez et consultez les classes de l'établissement.
+          </p>
         </div>
 
-        <button type="button" onClick={onBack}>
-          Retour au tableau de bord
+        <button
+          className="admin-button"
+          type="button"
+          onClick={onBack}
+        >
+          ← Retour au tableau de bord
         </button>
       </header>
 
-      <section>
-        <h2>Créer une classe</h2>
+      <div className="admin-page-content">
+        <section className="admin-card">
+          <h2>Créer une classe</h2>
 
-        <form onSubmit={handleCreateClass}>
-          <div>
+          <form
+            className="admin-form"
+            onSubmit={handleCreateClass}
+          >
             <label htmlFor="class-name">
               Nom de la classe
+
+              <input
+                id="class-name"
+                type="text"
+                value={name}
+                onChange={(event) =>
+                  setName(event.target.value)
+                }
+                placeholder="Exemple : 5e A"
+                maxLength={50}
+                required
+              />
             </label>
 
-            <input
-              id="class-name"
-              type="text"
-              value={name}
-              onChange={(event) =>
-                setName(event.target.value)
-              }
-              placeholder="Exemple : 5e A"
-              maxLength={50}
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="class-level">
               Niveau
+
+              <input
+                id="class-level"
+                type="text"
+                value={level}
+                onChange={(event) =>
+                  setLevel(event.target.value)
+                }
+                placeholder="Exemple : Cinquième"
+                maxLength={50}
+                required
+              />
             </label>
 
-            <input
-              id="class-level"
-              type="text"
-              value={level}
-              onChange={(event) =>
-                setLevel(event.target.value)
-              }
-              placeholder="Exemple : Cinquième"
-              maxLength={50}
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="school-year">
               Année scolaire
+
+              <input
+                id="school-year"
+                type="text"
+                value={schoolYear}
+                onChange={(event) =>
+                  setSchoolYear(event.target.value)
+                }
+                placeholder="2026-2027"
+                required
+              />
             </label>
 
-            <input
-              id="school-year"
-              type="text"
-              value={schoolYear}
-              onChange={(event) =>
-                setSchoolYear(event.target.value)
-              }
-              placeholder="2026-2027"
-              required
-            />
-          </div>
+            <div className="full-width">
+              <button
+                className="admin-button primary"
+                type="submit"
+                disabled={isCreating}
+              >
+                {isCreating
+                  ? 'Création en cours…'
+                  : 'Créer la classe'}
+              </button>
+            </div>
+          </form>
 
-          <button
-            type="submit"
-            disabled={isCreating}
-          >
-            {isCreating
-              ? 'Création en cours...'
-              : 'Créer la classe'}
-          </button>
-        </form>
+          {success && (
+            <p
+              className="admin-message success"
+              role="status"
+            >
+              {success}
+            </p>
+          )}
 
-        {success && (
-          <p role="status">
-            {success}
-          </p>
-        )}
+          {error && (
+            <p
+              className="admin-message error"
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
+        </section>
 
-        {error && (
-          <p role="alert">
-            {error}
-          </p>
-        )}
-      </section>
+        <section className="admin-card">
+          <h2>Classes enregistrées</h2>
 
-      <section>
-        <h2>Classes enregistrées</h2>
+          {isLoading && (
+            <p className="admin-empty">
+              Chargement des classes…
+            </p>
+          )}
 
-        {isLoading && <p>Chargement des classes...</p>}
+          {!isLoading && classes.length === 0 && (
+            <p className="admin-empty">
+              Aucune classe n'est enregistrée.
+            </p>
+          )}
 
-        {!isLoading && classes.length === 0 && (
-          <p>Aucune classe n’est enregistrée.</p>
-        )}
+          {!isLoading && classes.length > 0 && (
+            <div className="admin-table-wrapper">
+              <table className="admin-table-common">
+                <thead>
+                  <tr>
+                    <th>Classe</th>
+                    <th>Niveau</th>
+                    <th>Année scolaire</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
 
-        {!isLoading && classes.length > 0 && (
-          <table>
-            <thead>
-              <tr>
-                <th>Classe</th>
-                <th>Niveau</th>
-                <th>Année scolaire</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
+                <tbody>
+                  {classes.map((schoolClass) => (
+                    <tr key={schoolClass.id}>
+                      <td>
+                        <strong>{schoolClass.name}</strong>
+                      </td>
 
-            <tbody>
-              {classes.map((schoolClass) => (
-                <tr key={schoolClass.id}>
-                  <td>{schoolClass.name}</td>
-                  <td>{schoolClass.level}</td>
-                  <td>{schoolClass.school_year}</td>
-                  <td>
-                    {schoolClass.is_active
-                      ? 'Active'
-                      : 'Archivée'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+                      <td>{schoolClass.level}</td>
+
+                      <td>
+                        {schoolClass.school_year}
+                      </td>
+
+                      <td>
+                        <span
+                          className={
+                            schoolClass.is_active
+                              ? 'admin-badge green'
+                              : 'admin-badge orange'
+                          }
+                        >
+                          {schoolClass.is_active
+                            ? 'Active'
+                            : 'Archivée'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
     </main>
   )
 }

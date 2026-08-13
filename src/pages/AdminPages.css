@@ -1,0 +1,344 @@
+/* =========================================================
+   Styles communs aux pages d'administration
+   ========================================================= */
+
+.admin-page {
+  min-height: 100vh;
+  padding: 32px;
+  color: #172033;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(219, 234, 254, 0.8),
+      transparent 34%
+    ),
+    #f5f7fb;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+.admin-page *,
+.admin-page *::before,
+.admin-page *::after {
+  box-sizing: border-box;
+}
+
+.admin-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto 28px;
+  padding: 28px 32px;
+  border: 1px solid #e5eaf3;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 45px rgba(30, 64, 175, 0.08);
+}
+
+.admin-page-header h1 {
+  margin: 0;
+  color: #102044;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.admin-page-header p {
+  margin: 8px 0 0;
+  color: #667085;
+}
+
+.admin-page-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid #d8e0ee;
+  border-radius: 12px;
+  color: #24324a;
+  background: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.admin-button:hover:not(:disabled) {
+  border-color: #93b4f5;
+  background: #f4f8ff;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
+  transform: translateY(-1px);
+}
+
+.admin-button.primary {
+  border-color: #2563eb;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.admin-button.danger {
+  border-color: #fecaca;
+  color: #b91c1c;
+  background: #fff1f2;
+}
+
+.admin-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admin-card {
+  margin-bottom: 24px;
+  padding: 24px;
+  border: 1px solid #e5eaf3;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.admin-card h2 {
+  margin: 0 0 18px;
+  color: #102044;
+}
+
+.admin-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #344054;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea,
+.admin-input,
+.admin-select,
+.admin-textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid #d8e0ee;
+  border-radius: 11px;
+  color: #172033;
+  background: #fbfcfe;
+  font: inherit;
+}
+
+.admin-form textarea,
+.admin-textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.admin-form .full-width {
+  grid-column: 1 / -1;
+}
+
+.admin-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e5eaf3;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.admin-table-common {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table-common th {
+  padding: 16px;
+  border-bottom: 1px solid #e5eaf3;
+  color: #667085;
+  background: #f8faff;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-table-common td {
+  padding: 16px;
+  border-bottom: 1px solid #edf1f7;
+  color: #344054;
+  vertical-align: middle;
+}
+
+.admin-table-common tbody tr:hover {
+  background: #f8fbff;
+}
+
+.admin-table-common tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-message {
+  margin: 16px 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  line-height: 1.5;
+}
+
+.admin-message.error {
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  background: #fff1f2;
+}
+
+.admin-message.success {
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  background: #f0fdf4;
+}
+
+.admin-empty {
+  padding: 40px 20px;
+  color: #667085;
+  text-align: center;
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.admin-badge.blue {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.admin-badge.green {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.admin-badge.orange {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.admin-badge.red {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+@media (max-width: 800px) {
+  .admin-page {
+    padding: 18px;
+  }
+
+  .admin-page-header {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 22px;
+  }
+
+  .admin-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-form .full-width {
+    grid-column: auto;
+  }
+
+  .admin-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-page {
+    padding: 12px;
+  }
+
+  .admin-page-header {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .admin-card {
+    padding: 18px;
+  }
+
+  .admin-actions {
+    flex-direction: column;
+  }
+}
+.admin-module-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(230px, 1fr)
+  );
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.admin-module-card {
+  display: flex;
+  min-height: 190px;
+  flex-direction: column;
+  padding: 22px;
+  border: 1px solid #e5eaf3;
+  border-radius: 18px;
+  background: #f8faff;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.admin-module-card:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.1);
+  transform: translateY(-2px);
+}
+
+.admin-module-card h3 {
+  margin: 0;
+  color: #102044;
+  font-size: 1.12rem;
+}
+
+.admin-module-card p {
+  flex: 1;
+  margin: 12px 0 20px;
+  color: #667085;
+  line-height: 1.5;
+}
+
+.admin-module-card .admin-button {
+  width: 100%;
+}
