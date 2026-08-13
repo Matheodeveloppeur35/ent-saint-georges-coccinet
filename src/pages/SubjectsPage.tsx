@@ -4,6 +4,7 @@ import {
   type FormEvent,
 } from 'react'
 import { supabase } from '../lib/supabase'
+import './AdminPages.css'
 
 type Subject = {
   id: string
@@ -57,7 +58,7 @@ export function SubjectsPage({
   }
 
   useEffect(() => {
-    loadSubjects()
+    void loadSubjects()
   }, [])
 
   async function handleCreateSubject(
@@ -129,150 +130,194 @@ export function SubjectsPage({
   }
 
   return (
-    <main>
-      <header>
+    <main className="admin-page">
+      <header className="admin-page-header">
         <div>
           <p>Administration</p>
+
           <h1>Gestion des matières</h1>
+
+          <p>
+            Créez et consultez les matières enseignées dans
+            l’établissement.
+          </p>
         </div>
 
-        <button type="button" onClick={onBack}>
-          Retour au tableau de bord
+        <button
+          className="admin-button"
+          type="button"
+          onClick={onBack}
+        >
+          ← Retour au tableau de bord
         </button>
       </header>
 
-      <section>
-        <h2>Créer une matière</h2>
+      <div className="admin-page-content">
+        <section className="admin-card">
+          <h2>Créer une matière</h2>
 
-        <form onSubmit={handleCreateSubject}>
-          <div>
+          <form
+            className="admin-form"
+            onSubmit={handleCreateSubject}
+          >
             <label htmlFor="subject-name">
               Nom de la matière
+
+              <input
+                id="subject-name"
+                type="text"
+                value={name}
+                onChange={(event) =>
+                  setName(event.target.value)
+                }
+                placeholder="Exemple : Français"
+                minLength={2}
+                maxLength={80}
+                required
+              />
             </label>
 
-            <input
-              id="subject-name"
-              type="text"
-              value={name}
-              onChange={(event) =>
-                setName(event.target.value)
-              }
-              placeholder="Exemple : Français"
-              minLength={2}
-              maxLength={80}
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="subject-short-name">
               Abréviation
+
+              <input
+                id="subject-short-name"
+                type="text"
+                value={shortName}
+                onChange={(event) =>
+                  setShortName(event.target.value)
+                }
+                placeholder="Exemple : FR"
+                maxLength={20}
+                required
+              />
             </label>
 
-            <input
-              id="subject-short-name"
-              type="text"
-              value={shortName}
-              onChange={(event) =>
-                setShortName(event.target.value)
-              }
-              placeholder="Exemple : FR"
-              maxLength={20}
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="subject-color">
               Couleur
+
+              <div className="admin-color-field">
+                <input
+                  id="subject-color"
+                  className="admin-color-input"
+                  type="color"
+                  value={color}
+                  onChange={(event) =>
+                    setColor(event.target.value)
+                  }
+                  required
+                />
+
+                <span className="admin-color-value">
+                  {color.toUpperCase()}
+                </span>
+              </div>
             </label>
 
-            <input
-              id="subject-color"
-              type="color"
-              value={color}
-              onChange={(event) =>
-                setColor(event.target.value)
-              }
-              required
-            />
-          </div>
+            <div className="full-width">
+              <button
+                className="admin-button primary"
+                type="submit"
+                disabled={isCreating}
+              >
+                {isCreating
+                  ? 'Création en cours…'
+                  : 'Créer la matière'}
+              </button>
+            </div>
+          </form>
 
-          <button
-            type="submit"
-            disabled={isCreating}
-          >
-            {isCreating
-              ? 'Création en cours...'
-              : 'Créer la matière'}
-          </button>
-        </form>
+          {success && (
+            <p
+              className="admin-message success"
+              role="status"
+            >
+              {success}
+            </p>
+          )}
 
-        {success && (
-          <p role="status">
-            {success}
-          </p>
-        )}
+          {error && (
+            <p
+              className="admin-message error"
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
+        </section>
 
-        {error && (
-          <p role="alert">
-            {error}
-          </p>
-        )}
-      </section>
+        <section className="admin-card">
+          <h2>Matières enregistrées</h2>
 
-      <section>
-        <h2>Matières enregistrées</h2>
+          {isLoading && (
+            <p className="admin-empty">
+              Chargement des matières…
+            </p>
+          )}
 
-        {isLoading && (
-          <p>Chargement des matières...</p>
-        )}
+          {!isLoading && subjects.length === 0 && (
+            <p className="admin-empty">
+              Aucune matière n’est enregistrée.
+            </p>
+          )}
 
-        {!isLoading && subjects.length === 0 && (
-          <p>Aucune matière n’est enregistrée.</p>
-        )}
+          {!isLoading && subjects.length > 0 && (
+            <div className="admin-table-wrapper">
+              <table className="admin-table-common">
+                <thead>
+                  <tr>
+                    <th>Couleur</th>
+                    <th>Matière</th>
+                    <th>Abréviation</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
 
-        {!isLoading && subjects.length > 0 && (
-          <table>
-            <thead>
-              <tr>
-                <th>Couleur</th>
-                <th>Matière</th>
-                <th>Abréviation</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
+                <tbody>
+                  {subjects.map((subject) => (
+                    <tr key={subject.id}>
+                      <td>
+                        <span
+                          className="admin-color-preview"
+                          title={subject.color}
+                          style={{
+                            backgroundColor: subject.color,
+                          }}
+                          aria-label={`Couleur ${subject.color}`}
+                        />
+                      </td>
 
-            <tbody>
-              {subjects.map((subject) => (
-                <tr key={subject.id}>
-                  <td>
-                    <span
-                      title={subject.color}
-                      style={{
-                        display: 'inline-block',
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '6px',
-                        backgroundColor: subject.color,
-                      }}
-                    />
-                  </td>
+                      <td>
+                        <strong>{subject.name}</strong>
+                      </td>
 
-                  <td>{subject.name}</td>
-                  <td>{subject.short_name}</td>
+                      <td>
+                        <span className="admin-badge blue">
+                          {subject.short_name}
+                        </span>
+                      </td>
 
-                  <td>
-                    {subject.is_active
-                      ? 'Active'
-                      : 'Archivée'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+                      <td>
+                        <span
+                          className={
+                            subject.is_active
+                              ? 'admin-badge green'
+                              : 'admin-badge orange'
+                          }
+                        >
+                          {subject.is_active
+                            ? 'Active'
+                            : 'Archivée'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
     </main>
   )
 }
