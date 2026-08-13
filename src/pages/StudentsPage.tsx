@@ -4,6 +4,7 @@ import {
   type FormEvent,
 } from 'react'
 import { supabase } from '../lib/supabase'
+import './AdminPages.css'
 
 type SchoolClass = {
   id: string
@@ -90,7 +91,7 @@ export function StudentsPage({
   }
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [])
 
   async function handleCreateStudent(
@@ -105,7 +106,8 @@ export function StudentsPage({
       studentNumber.trim().toUpperCase()
 
     const normalizedFirstName = firstName.trim()
-    const normalizedLastName = lastName.trim().toUpperCase()
+    const normalizedLastName =
+      lastName.trim().toUpperCase()
 
     if (
       !normalizedStudentNumber ||
@@ -158,201 +160,284 @@ export function StudentsPage({
   }
 
   return (
-    <main>
-      <header>
+    <main className="admin-page">
+      <header className="admin-page-header">
         <div>
           <p>Administration</p>
+
           <h1>Gestion des élèves</h1>
+
+          <p>
+            Créez et consultez les dossiers scolaires des
+            élèves.
+          </p>
         </div>
 
-        <button type="button" onClick={onBack}>
-          Retour au tableau de bord
+        <button
+          className="admin-button"
+          type="button"
+          onClick={onBack}
+        >
+          ← Retour au tableau de bord
         </button>
       </header>
 
-      <section>
-        <h2>Créer un dossier élève</h2>
+      <div className="admin-page-content">
+        <section className="admin-card">
+          <h2>Créer un dossier élève</h2>
 
-        <form onSubmit={handleCreateStudent}>
-          <div>
+          <form
+            className="admin-form"
+            onSubmit={handleCreateStudent}
+          >
             <label htmlFor="student-number">
               Numéro d’élève
+
+              <input
+                id="student-number"
+                type="text"
+                value={studentNumber}
+                onChange={(event) =>
+                  setStudentNumber(event.target.value)
+                }
+                placeholder="Exemple : ELV-0002"
+                minLength={3}
+                maxLength={30}
+                required
+              />
             </label>
 
-            <input
-              id="student-number"
-              type="text"
-              value={studentNumber}
-              onChange={(event) =>
-                setStudentNumber(event.target.value)
-              }
-              placeholder="Exemple : ELV-0002"
-              minLength={3}
-              maxLength={30}
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="student-first-name">
               Prénom
+
+              <input
+                id="student-first-name"
+                type="text"
+                value={firstName}
+                onChange={(event) =>
+                  setFirstName(event.target.value)
+                }
+                placeholder="Exemple : Camille"
+                maxLength={80}
+                required
+              />
             </label>
 
-            <input
-              id="student-first-name"
-              type="text"
-              value={firstName}
-              onChange={(event) =>
-                setFirstName(event.target.value)
-              }
-              maxLength={80}
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="student-last-name">
               Nom
+
+              <input
+                id="student-last-name"
+                type="text"
+                value={lastName}
+                onChange={(event) =>
+                  setLastName(event.target.value)
+                }
+                placeholder="Exemple : MARTIN"
+                maxLength={80}
+                required
+              />
             </label>
 
-            <input
-              id="student-last-name"
-              type="text"
-              value={lastName}
-              onChange={(event) =>
-                setLastName(event.target.value)
-              }
-              maxLength={80}
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="student-birth-date">
               Date de naissance
+
+              <input
+                id="student-birth-date"
+                type="date"
+                value={birthDate}
+                onChange={(event) =>
+                  setBirthDate(event.target.value)
+                }
+              />
             </label>
 
-            <input
-              id="student-birth-date"
-              type="date"
-              value={birthDate}
-              onChange={(event) =>
-                setBirthDate(event.target.value)
-              }
-            />
-          </div>
-
-          <div>
             <label htmlFor="student-class">
               Classe
+
+              <select
+                id="student-class"
+                value={classId}
+                onChange={(event) =>
+                  setClassId(event.target.value)
+                }
+              >
+                <option value="">Aucune classe</option>
+
+                {classes.map((schoolClass) => (
+                  <option
+                    key={schoolClass.id}
+                    value={schoolClass.id}
+                  >
+                    {schoolClass.name} —{' '}
+                    {schoolClass.school_year}
+                  </option>
+                ))}
+              </select>
             </label>
 
-            <select
-              id="student-class"
-              value={classId}
-              onChange={(event) =>
-                setClassId(event.target.value)
-              }
-            >
-              <option value="">
-                Aucune classe
-              </option>
+            <div className="full-width">
+              <button
+                className="admin-button primary"
+                type="submit"
+                disabled={isCreating}
+              >
+                {isCreating
+                  ? 'Création en cours…'
+                  : 'Créer le dossier élève'}
+              </button>
+            </div>
+          </form>
 
-              {classes.map((schoolClass) => (
-                <option
-                  key={schoolClass.id}
-                  value={schoolClass.id}
-                >
-                  {schoolClass.name} —{' '}
-                  {schoolClass.school_year}
-                </option>
-              ))}
-            </select>
+          {success && (
+            <p
+              className="admin-message success"
+              role="status"
+            >
+              {success}
+            </p>
+          )}
+
+          {error && (
+            <p
+              className="admin-message error"
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
+        </section>
+
+        <section className="admin-card">
+          <div className="admin-section-heading">
+            <div>
+              <h2>Élèves enregistrés</h2>
+
+              {!isLoading && (
+                <p>
+                  {students.length}{' '}
+                  {students.length > 1
+                    ? 'élèves enregistrés'
+                    : 'élève enregistré'}
+                </p>
+              )}
+            </div>
+
+            <button
+              className="admin-button"
+              type="button"
+              onClick={() => void loadData()}
+              disabled={isLoading}
+            >
+              {isLoading
+                ? 'Chargement…'
+                : 'Actualiser'}
+            </button>
           </div>
 
-          <button
-            type="submit"
-            disabled={isCreating}
-          >
-            {isCreating
-              ? 'Création en cours...'
-              : 'Créer le dossier élève'}
-          </button>
-        </form>
+          {isLoading && (
+            <p className="admin-empty">
+              Chargement des élèves…
+            </p>
+          )}
 
-        {success && (
-          <p role="status">
-            {success}
-          </p>
-        )}
+          {!isLoading && students.length === 0 && (
+            <p className="admin-empty">
+              Aucun élève n’est enregistré.
+            </p>
+          )}
 
-        {error && (
-          <p role="alert">
-            {error}
-          </p>
-        )}
-      </section>
+          {!isLoading && students.length > 0 && (
+            <div className="admin-table-wrapper">
+              <table className="admin-table-common">
+                <thead>
+                  <tr>
+                    <th>Numéro</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Date de naissance</th>
+                    <th>Classe</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
 
-      <section>
-        <h2>Élèves enregistrés</h2>
+                <tbody>
+                  {students.map((student) => {
+                    const studentClass =
+                      student.classes?.[0]
 
-        {isLoading && (
-          <p>Chargement des élèves...</p>
-        )}
+                    return (
+                      <tr key={student.id}>
+                        <td>
+                          <span className="admin-badge blue">
+                            {student.student_number}
+                          </span>
+                        </td>
 
-        {!isLoading && students.length === 0 && (
-          <p>Aucun élève n’est enregistré.</p>
-        )}
+                        <td>
+                          <strong>
+                            {student.last_name}
+                          </strong>
+                        </td>
 
-        {!isLoading && students.length > 0 && (
-          <table>
-            <thead>
-              <tr>
-                <th>Numéro</th>
-                <th>Nom</th>
-                <th>Prénom</th>
-                <th>Date de naissance</th>
-                <th>Classe</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
+                        <td>{student.first_name}</td>
 
-            <tbody>
-              {students.map((student) => (
-                <tr key={student.id}>
-                  <td>{student.student_number}</td>
-                  <td>{student.last_name}</td>
-                  <td>{student.first_name}</td>
+                        <td>
+                          {student.birth_date
+                            ? new Intl.DateTimeFormat(
+                                'fr-FR',
+                              ).format(
+                                new Date(
+                                  `${student.birth_date}T12:00:00`,
+                                ),
+                              )
+                            : (
+                              <span className="admin-muted">
+                                Non renseignée
+                              </span>
+                            )}
+                        </td>
 
-                  <td>
-                    {student.birth_date
-                      ? new Intl.DateTimeFormat(
-                          'fr-FR',
-                        ).format(
-                          new Date(
-                            `${student.birth_date}T12:00:00`,
-                          ),
-                        )
-                      : 'Non renseignée'}
-                  </td>
+                        <td>
+                          {studentClass ? (
+                            <div className="admin-cell-stack">
+                              <strong>
+                                {studentClass.name}
+                              </strong>
 
-                  <td>
-                    {student.classes?.[0]
-  ? `${student.classes[0].name} — ${student.classes[0].school_year}`
-  : 'Non affecté'}
-                  </td>
+                              <small>
+                                {studentClass.school_year}
+                              </small>
+                            </div>
+                          ) : (
+                            <span className="admin-badge orange">
+                              Non affecté
+                            </span>
+                          )}
+                        </td>
 
-                  <td>
-                    {student.is_active
-                      ? 'Actif'
-                      : 'Archivé'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+                        <td>
+                          <span
+                            className={
+                              student.is_active
+                                ? 'admin-badge green'
+                                : 'admin-badge orange'
+                            }
+                          >
+                            {student.is_active
+                              ? 'Actif'
+                              : 'Archivé'}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
     </main>
   )
 }

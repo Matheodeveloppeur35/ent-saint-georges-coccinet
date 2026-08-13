@@ -378,3 +378,39 @@
     0 4px 10px rgba(15, 23, 42, 0.12);
   vertical-align: middle;
 }
+/* En-têtes internes et cellules des tableaux */
+
+.admin-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.admin-section-heading h2 {
+  margin-bottom: 4px;
+}
+
+.admin-section-heading p {
+  margin: 0;
+  color: #667085;
+}
+
+.admin-cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-cell-stack small,
+.admin-muted {
+  color: #8a94a6;
+}
+
+@media (max-width: 800px) {
+  .admin-section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
