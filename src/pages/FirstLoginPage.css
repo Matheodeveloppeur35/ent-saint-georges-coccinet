@@ -1,0 +1,543 @@
+/* =========================================================
+   Première connexion
+   ========================================================= */
+
+.first-login-page {
+  display: grid;
+  min-height: 100vh;
+  padding: 28px;
+  place-items: center;
+  color: #172033;
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(147, 197, 253, 0.45),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(196, 181, 253, 0.35),
+      transparent 32%
+    ),
+    #eef3fb;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-sizing: border-box;
+}
+
+.first-login-page *,
+.first-login-page *::before,
+.first-login-page *::after {
+  box-sizing: border-box;
+}
+
+.first-login-shell {
+  display: grid;
+  width: min(1120px, 100%);
+  min-height: 720px;
+  grid-template-columns:
+    minmax(0, 0.95fr)
+    minmax(440px, 1.05fr);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 30px;
+  background: #ffffff;
+  box-shadow:
+    0 30px 70px rgba(30, 64, 175, 0.15),
+    0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+/* Présentation */
+
+.first-login-presentation {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px;
+  color: #ffffff;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(30, 64, 175, 0.98),
+      rgba(37, 99, 235, 0.93) 52%,
+      rgba(79, 70, 229, 0.92)
+    );
+}
+
+.first-login-presentation::before,
+.first-login-presentation::after {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.first-login-presentation::before {
+  top: -130px;
+  right: -110px;
+  width: 330px;
+  height: 330px;
+}
+
+.first-login-presentation::after {
+  right: -180px;
+  bottom: -220px;
+  width: 480px;
+  height: 480px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.first-login-brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.first-login-brand-mark,
+.first-login-mobile-mark {
+  display: inline-flex;
+  width: 52px;
+  height: 52px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 16px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.first-login-brand p {
+  margin: 0 0 2px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.first-login-brand strong {
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.first-login-introduction {
+  position: relative;
+  z-index: 1;
+  max-width: 490px;
+  padding: 50px 0;
+}
+
+.first-login-kicker {
+  margin: 0 0 12px;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.first-login-presentation .first-login-kicker {
+  color: #bfdbfe;
+}
+
+.first-login-introduction h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2.6rem, 4.5vw, 4.2rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+
+.first-login-introduction > p:last-child {
+  margin: 24px 0 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.first-login-security {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.first-login-security span {
+  display: inline-flex;
+  width: 25px;
+  height: 25px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: #1e40af;
+  background: #dbeafe;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.first-login-security p {
+  margin: 1px 0 0;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* Formulaire */
+
+.first-login-form-panel {
+  display: grid;
+  padding: 54px;
+  place-items: center;
+  background: #ffffff;
+}
+
+.first-login-form-container {
+  width: min(100%, 450px);
+}
+
+.first-login-form-header {
+  margin-bottom: 28px;
+}
+
+.first-login-mobile-mark {
+  display: none;
+  margin-bottom: 24px;
+  border-color: #bfdbfe;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.first-login-form-header h2 {
+  margin: 0;
+  color: #102044;
+  font-size: clamp(1.9rem, 4vw, 2.55rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+.first-login-form-header > p:last-child {
+  margin: 12px 0 0;
+  color: #667085;
+  line-height: 1.6;
+}
+
+.first-login-form {
+  display: grid;
+  gap: 18px;
+}
+
+.first-login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #344054;
+  font-size: 0.91rem;
+  font-weight: 750;
+}
+
+.first-login-form input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 15px;
+  border: 1px solid #d8e0ee;
+  border-radius: 13px;
+  color: #172033;
+  background: #fbfcfe;
+  font: inherit;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.first-login-form input::placeholder {
+  color: #98a2b3;
+}
+
+.first-login-form input:hover:not(:disabled) {
+  border-color: #b8c6dc;
+}
+
+.first-login-form input:focus {
+  border-color: #2563eb;
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.13);
+}
+
+.first-login-form input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Règles du mot de passe */
+
+.password-rules {
+  padding: 16px;
+  border: 1px solid #e5eaf3;
+  border-radius: 14px;
+  background: #f8faff;
+}
+
+.password-rules > p {
+  margin: 0 0 11px;
+  color: #344054;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.password-rules ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.password-rules li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #7c8799;
+  font-size: 0.8rem;
+  transition: color 160ms ease;
+}
+
+.password-rules li span {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: #667085;
+  background: #e8edf5;
+  font-size: 0.7rem;
+  font-weight: 900;
+  transition:
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.password-rules li.is-valid {
+  color: #047857;
+  font-weight: 700;
+}
+
+.password-rules li.is-valid span {
+  color: #ffffff;
+  background: #10b981;
+}
+
+/* Erreur */
+
+.first-login-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px 15px;
+  border: 1px solid #fecaca;
+  border-radius: 13px;
+  color: #991b1b;
+  background: #fff1f2;
+}
+
+.first-login-error > span {
+  display: inline-flex;
+  width: 23px;
+  height: 23px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #dc2626;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.first-login-error p {
+  margin: 1px 0 0;
+  line-height: 1.45;
+}
+
+/* Bouton */
+
+.first-login-submit {
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 13px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.24);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    filter 160ms ease;
+}
+
+.first-login-submit:hover:not(:disabled) {
+  box-shadow: 0 15px 28px rgba(37, 99, 235, 0.3);
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.first-login-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.first-login-submit:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.3);
+  outline-offset: 3px;
+}
+
+.first-login-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.first-login-spinner {
+  width: 19px;
+  height: 19px;
+  border: 2px solid rgba(255, 255, 255, 0.38);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: first-login-spin 700ms linear infinite;
+}
+
+.first-login-footer {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid #edf1f7;
+  color: #98a2b3;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.first-login-footer p {
+  margin: 0;
+}
+
+@keyframes first-login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Tablettes */
+
+@media (max-width: 900px) {
+  .first-login-page {
+    padding: 20px;
+  }
+
+  .first-login-shell {
+    min-height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .first-login-presentation {
+    min-height: 310px;
+    padding: 36px;
+  }
+
+  .first-login-introduction {
+    padding: 40px 0 20px;
+  }
+
+  .first-login-introduction h1 {
+    font-size: 2.7rem;
+  }
+
+  .first-login-security {
+    display: none;
+  }
+
+  .first-login-form-panel {
+    padding: 48px 36px;
+  }
+}
+
+/* Mobiles */
+
+@media (max-width: 560px) {
+  .first-login-page {
+    display: block;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .first-login-shell {
+    min-height: 100vh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .first-login-presentation {
+    display: none;
+  }
+
+  .first-login-form-panel {
+    min-height: 100vh;
+    padding: 34px 22px;
+  }
+
+  .first-login-form-container {
+    margin: auto;
+  }
+
+  .first-login-mobile-mark {
+    display: inline-flex;
+  }
+
+  .first-login-form-header h2 {
+    font-size: 2rem;
+  }
+
+  .password-rules ul {
+    grid-template-columns: 1fr;
+  }
+
+  .first-login-submit {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .first-login-submit,
+  .first-login-form input,
+  .password-rules li,
+  .password-rules li span {
+    transition: none;
+  }
+
+  .first-login-spinner {
+    animation-duration: 1.4s;
+  }
+}
