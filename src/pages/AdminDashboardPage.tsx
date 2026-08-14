@@ -7,6 +7,7 @@ import { TeachersPage } from './TeachersPage'
 import { ClassSubjectsPage } from './ClassSubjectsPage'
 import { TimetablesPage } from './TimetablesPage'
 import LessonsPage from './LessonsPage'
+import { SchoolLifePage } from './SchoolLifePage'
 import './AdminPages.css'
 
 type AdminDashboardPageProps = {
@@ -24,6 +25,13 @@ type AdminPage =
   | 'class_subjects'
   | 'timetables'
   | 'lessons'
+  | 'school_life'
+
+type AdminModule = {
+  title: string
+  description: string
+  action?: () => void
+}
 
 export function AdminDashboardPage({
   firstName,
@@ -44,10 +52,14 @@ export function AdminDashboardPage({
     onSignOut()
   }
 
+  function returnToDashboard() {
+    setCurrentPage('dashboard')
+  }
+
   if (currentPage === 'classes') {
     return (
       <ClassesPage
-        onBack={() => setCurrentPage('dashboard')}
+        onBack={returnToDashboard}
       />
     )
   }
@@ -55,7 +67,7 @@ export function AdminDashboardPage({
   if (currentPage === 'subjects') {
     return (
       <SubjectsPage
-        onBack={() => setCurrentPage('dashboard')}
+        onBack={returnToDashboard}
       />
     )
   }
@@ -63,7 +75,7 @@ export function AdminDashboardPage({
   if (currentPage === 'students') {
     return (
       <StudentsPage
-        onBack={() => setCurrentPage('dashboard')}
+        onBack={returnToDashboard}
       />
     )
   }
@@ -71,7 +83,7 @@ export function AdminDashboardPage({
   if (currentPage === 'teachers') {
     return (
       <TeachersPage
-        onBack={() => setCurrentPage('dashboard')}
+        onBack={returnToDashboard}
       />
     )
   }
@@ -79,7 +91,7 @@ export function AdminDashboardPage({
   if (currentPage === 'class_subjects') {
     return (
       <ClassSubjectsPage
-        onBack={() => setCurrentPage('dashboard')}
+        onBack={returnToDashboard}
       />
     )
   }
@@ -87,7 +99,7 @@ export function AdminDashboardPage({
   if (currentPage === 'timetables') {
     return (
       <TimetablesPage
-        onBack={() => setCurrentPage('dashboard')}
+        onBack={returnToDashboard}
       />
     )
   }
@@ -95,23 +107,29 @@ export function AdminDashboardPage({
   if (currentPage === 'lessons') {
     return (
       <LessonsPage
-        onBack={() => setCurrentPage('dashboard')}
+        onBack={returnToDashboard}
       />
     )
   }
 
-  const modules = [
+  if (currentPage === 'school_life') {
+    return (
+      <SchoolLifePage
+        onBack={returnToDashboard}
+      />
+    )
+  }
+
+  const modules: AdminModule[] = [
     {
       title: 'Utilisateurs',
       description:
         'Créer, modifier, suspendre et gérer les comptes.',
-      action: undefined,
     },
     {
       title: 'Rôles et permissions',
       description:
         'Attribuer les espaces et contrôler les accès.',
-      action: undefined,
     },
     {
       title: 'Classes',
@@ -134,7 +152,7 @@ export function AdminDashboardPage({
     {
       title: 'Affectations',
       description:
-        'Relier professeurs, classes et matières.',
+        'Relier les professeurs, les classes et les matières.',
       action: () => setCurrentPage('class_subjects'),
     },
     {
@@ -146,39 +164,35 @@ export function AdminDashboardPage({
     {
       title: 'Emplois du temps',
       description:
-        'Créer les cours et ajouter les entrées '
-        + '(salle, notes, annulations).',
+        'Créer les cours et gérer les salles, les notes et les annulations.',
       action: () => setCurrentPage('timetables'),
     },
     {
       title: 'Cahier de texte',
       description:
-        'Créer des séances et enregistrer travaux / notes.',
+        'Consulter les séances, les travaux réalisés et les devoirs.',
       action: () => setCurrentPage('lessons'),
     },
     {
       title: 'Vie scolaire',
       description:
-        'Consulter les appels, absences et retards.',
-      action: undefined,
+        'Enregistrer les présences, absences, retards et justificatifs.',
+      action: () => setCurrentPage('school_life'),
     },
     {
       title: 'Notation professorale',
       description:
-        'Suivre les appels et les cahiers de texte.',
-      action: undefined,
+        'Créer et consulter les évaluations et les résultats.',
     },
     {
       title: 'Entreprises et stages',
       description:
-        'Gérer les partenaires, stages et conventions.',
-      action: undefined,
+        'Gérer les partenaires, les stages et les conventions.',
     },
     {
       title: 'Paramètres',
       description:
-        "Configurer les modules et l'établissement.",
-      action: undefined,
+        'Configurer les modules et l’établissement.',
     },
   ]
 
@@ -198,7 +212,7 @@ export function AdminDashboardPage({
         <button
           className="admin-button danger"
           type="button"
-          onClick={handleSignOut}
+          onClick={() => void handleSignOut()}
         >
           Se déconnecter
         </button>
@@ -206,11 +220,15 @@ export function AdminDashboardPage({
 
       <div className="admin-page-content">
         <section className="admin-card">
-          <h2>Tableau de bord</h2>
+          <div className="admin-section-heading">
+            <div>
+              <h2>Tableau de bord</h2>
 
-          <p>
-            Gérez les principaux services de votre ENT.
-          </p>
+              <p>
+                Gérez les principaux services de votre ENT.
+              </p>
+            </div>
+          </div>
 
           <div className="admin-module-grid">
             {modules.map((module) => (
