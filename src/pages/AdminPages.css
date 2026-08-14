@@ -596,3 +596,123 @@
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   Notation professorale
+   ========================================================= */
+
+.admin-grade-stats {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.admin-grade-filters {
+  grid-template-columns:
+    minmax(240px, 1.5fr)
+    repeat(4, minmax(150px, 1fr));
+}
+
+.admin-assessment-table {
+  min-width: 1500px;
+}
+
+.admin-subject-label {
+  display: inline-block;
+  min-width: 130px;
+  padding: 7px 10px;
+  border-left: 5px solid #64748b;
+  border-radius: 7px;
+  color: #344054;
+  background: #f8fafc;
+  font-weight: 700;
+}
+
+.admin-selected-assessment {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.admin-selected-assessment > div {
+  padding: 16px;
+  border: 1px solid #e5eaf3;
+  border-radius: 14px;
+  background: #f8faff;
+}
+
+.admin-selected-assessment span {
+  display: block;
+  margin-bottom: 7px;
+  color: #667085;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.admin-selected-assessment strong {
+  color: #102044;
+}
+
+.admin-results-table {
+  min-width: 900px;
+  margin-top: 20px;
+}
+
+.admin-results-table .admin-select,
+.admin-results-table .admin-input {
+  min-width: 160px;
+}
+
+.admin-score-field {
+  display: flex;
+  min-width: 180px;
+  align-items: center;
+  gap: 9px;
+}
+
+.admin-score-field .admin-input {
+  min-width: 100px;
+}
+
+.admin-score-field span {
+  color: #667085;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.admin-results-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+@media (max-width: 1200px) {
+  .admin-grade-stats {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-grade-filters {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-selected-assessment {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-grade-stats,
+  .admin-grade-filters,
+  .admin-selected-assessment {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-results-actions {
+    display: block;
+  }
+
+  .admin-results-actions .admin-button {
+    width: 100%;
+  }
+}
