@@ -79,11 +79,22 @@ export function LoginPage() {
         .eq('id', user.id)
         .single()
 
-      if (profileError || !accountProfile) {
-        throw new Error(
-          'Le profil administrateur est inaccessible.',
-        )
-      }
+      if (profileError) {
+  console.error(
+    'Erreur de chargement du profil :',
+    profileError,
+  )
+
+  throw new Error(
+    `Le profil administrateur est inaccessible : ${profileError.message}`,
+  )
+}
+
+if (!accountProfile) {
+  throw new Error(
+    'Aucun profil ne correspond à ce compte.',
+  )
+}
 
       if (
         accountProfile.account_status === 'suspended' ||
