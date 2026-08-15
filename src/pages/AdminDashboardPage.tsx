@@ -11,6 +11,8 @@ import { SchoolLifePage } from './SchoolLifePage'
 import { AssessmentsPage } from './AssessmentsPage'
 import { InternshipsPage } from './InternshipsPage'
 import './AdminPages.css'
+import { SettingsPage } from './SettingsPage'
+
 
 type AdminDashboardPageProps = {
   firstName: string
@@ -30,6 +32,7 @@ type AdminPage =
   | 'school_life'
   | 'assessments'
   | 'internships'
+  | 'settings'
 
 type AdminModule = {
   title: string
@@ -110,6 +113,12 @@ export function AdminDashboardPage({
     )
   }
 
+if (currentPage === 'settings') {
+  return (
+    <SettingsPage onBack={returnToDashboard} />
+  )
+}
+
   const modules: AdminModule[] = [
     {
       title: 'Utilisateurs',
@@ -181,11 +190,13 @@ export function AdminDashboardPage({
         'Gérer les partenaires, les stages et les conventions.',
       action: () => setCurrentPage('internships'),
     },
-    {
-      title: 'Paramètres',
-      description:
-        'Configurer les modules et l’établissement.',
-    },
+   {
+  title: 'Paramètres',
+  description:
+    'Configurer l’établissement, les périodes scolaires et les modules.',
+  action: () => setCurrentPage('settings'),
+},
+
   ]
 
   return (
