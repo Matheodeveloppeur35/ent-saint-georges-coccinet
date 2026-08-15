@@ -8,6 +8,8 @@ import { ClassSubjectsPage } from './ClassSubjectsPage'
 import { TimetablesPage } from './TimetablesPage'
 import LessonsPage from './LessonsPage'
 import { SchoolLifePage } from './SchoolLifePage'
+import { AssessmentsPage } from './AssessmentsPage'
+import { InternshipsPage } from './InternshipsPage'
 import './AdminPages.css'
 
 type AdminDashboardPageProps = {
@@ -26,6 +28,8 @@ type AdminPage =
   | 'timetables'
   | 'lessons'
   | 'school_life'
+  | 'assessments'
+  | 'internships'
 
 type AdminModule = {
   title: string
@@ -57,66 +61,52 @@ export function AdminDashboardPage({
   }
 
   if (currentPage === 'classes') {
-    return (
-      <ClassesPage
-        onBack={returnToDashboard}
-      />
-    )
+    return <ClassesPage onBack={returnToDashboard} />
   }
 
   if (currentPage === 'subjects') {
-    return (
-      <SubjectsPage
-        onBack={returnToDashboard}
-      />
-    )
+    return <SubjectsPage onBack={returnToDashboard} />
   }
 
   if (currentPage === 'students') {
-    return (
-      <StudentsPage
-        onBack={returnToDashboard}
-      />
-    )
+    return <StudentsPage onBack={returnToDashboard} />
   }
 
   if (currentPage === 'teachers') {
-    return (
-      <TeachersPage
-        onBack={returnToDashboard}
-      />
-    )
+    return <TeachersPage onBack={returnToDashboard} />
   }
 
   if (currentPage === 'class_subjects') {
     return (
-      <ClassSubjectsPage
-        onBack={returnToDashboard}
-      />
+      <ClassSubjectsPage onBack={returnToDashboard} />
     )
   }
 
   if (currentPage === 'timetables') {
     return (
-      <TimetablesPage
-        onBack={returnToDashboard}
-      />
+      <TimetablesPage onBack={returnToDashboard} />
     )
   }
 
   if (currentPage === 'lessons') {
-    return (
-      <LessonsPage
-        onBack={returnToDashboard}
-      />
-    )
+    return <LessonsPage onBack={returnToDashboard} />
   }
 
   if (currentPage === 'school_life') {
     return (
-      <SchoolLifePage
-        onBack={returnToDashboard}
-      />
+      <SchoolLifePage onBack={returnToDashboard} />
+    )
+  }
+
+  if (currentPage === 'assessments') {
+    return (
+      <AssessmentsPage onBack={returnToDashboard} />
+    )
+  }
+
+  if (currentPage === 'internships') {
+    return (
+      <InternshipsPage onBack={returnToDashboard} />
     )
   }
 
@@ -182,12 +172,14 @@ export function AdminDashboardPage({
     {
       title: 'Notation professorale',
       description:
-        'Créer et consulter les évaluations et les résultats.',
+        'Créer les évaluations, saisir les notes et publier les résultats.',
+      action: () => setCurrentPage('assessments'),
     },
     {
       title: 'Entreprises et stages',
       description:
         'Gérer les partenaires, les stages et les conventions.',
+      action: () => setCurrentPage('internships'),
     },
     {
       title: 'Paramètres',
