@@ -12,6 +12,7 @@ import { AssessmentsPage } from './AssessmentsPage'
 import { InternshipsPage } from './InternshipsPage'
 import './AdminPages.css'
 import { SettingsPage } from './SettingsPage'
+import { UsersPage } from './UsersPage'
 
 
 type AdminDashboardPageProps = {
@@ -22,6 +23,7 @@ type AdminDashboardPageProps = {
 
 type AdminPage =
   | 'dashboard'
+  | 'users'
   | 'classes'
   | 'subjects'
   | 'students'
@@ -62,6 +64,11 @@ export function AdminDashboardPage({
   function returnToDashboard() {
     setCurrentPage('dashboard')
   }
+if (currentPage === 'users') {
+  return (
+    <UsersPage onBack={returnToDashboard} />
+  )
+}
 
   if (currentPage === 'classes') {
     return <ClassesPage onBack={returnToDashboard} />
@@ -121,10 +128,11 @@ if (currentPage === 'settings') {
 
   const modules: AdminModule[] = [
     {
-      title: 'Utilisateurs',
-      description:
-        'Créer, modifier, suspendre et gérer les comptes.',
-    },
+  title: 'Utilisateurs',
+  description:
+    'Créer les comptes, gérer les statuts et attribuer les rôles.',
+  action: () => setCurrentPage('users'),
+},
     {
       title: 'Rôles et permissions',
       description:

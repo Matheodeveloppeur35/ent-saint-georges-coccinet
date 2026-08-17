@@ -490,3 +490,100 @@
     animation-duration: 1.4s;
   }
 }
+/* =========================================================
+   Espace non encore disponible
+   ========================================================= */
+
+.login-access-denied {
+  width: min(580px, 100%);
+  padding: 44px;
+  border: 1px solid #e5eaf3;
+  border-radius: 26px;
+  background: #ffffff;
+  box-shadow:
+    0 24px 60px rgba(30, 64, 175, 0.12),
+    0 8px 24px rgba(15, 23, 42, 0.06);
+  text-align: center;
+}
+
+.login-access-mark {
+  display: inline-flex;
+  margin: 0 auto 24px;
+}
+
+.login-access-denied h1 {
+  margin: 0;
+  color: #102044;
+  font-size: clamp(2rem, 5vw, 2.7rem);
+  line-height: 1.1;
+}
+
+.login-access-denied > p:not(.login-kicker) {
+  margin: 16px 0 0;
+  color: #667085;
+  line-height: 1.65;
+}
+
+.login-role-summary {
+  margin: 26px 0 0;
+  padding: 18px;
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  background: #f5f9ff;
+}
+
+.login-role-summary > span {
+  display: block;
+  margin-bottom: 12px;
+  color: #667085;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.login-role-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.login-role-list strong {
+  display: inline-flex;
+  min-height: 31px;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 999px;
+  color: #1d4ed8;
+  background: #dbeafe;
+  font-size: 0.82rem;
+}
+
+.login-access-information {
+  padding: 14px;
+  border-radius: 13px;
+  color: #475467 !important;
+  background: #f8fafc;
+  font-size: 0.9rem;
+}
+
+.login-access-denied .login-error {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.login-access-denied .login-submit {
+  width: 100%;
+  margin-top: 26px;
+}
+
+@media (max-width: 560px) {
+  .login-access-denied {
+    min-height: 100vh;
+    padding: 38px 22px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

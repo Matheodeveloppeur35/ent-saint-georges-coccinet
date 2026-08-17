@@ -8,17 +8,48 @@ import { FirstLoginPage } from './FirstLoginPage'
 import { AdminDashboardPage } from './AdminDashboardPage'
 import './LoginPage.css'
 
-type Profile = {
+type AppRole =
+  | 'administrator'
+  | 'direction'
+  | 'school_life'
+  | 'nurse'
+  | 'teacher'
+  | 'student'
+  | 'parent'
+  | 'company'
+
+type AccountStatus =
+  | 'invited'
+  | 'active'
+  | 'suspended'
+  | 'locked'
+  | 'archived'
+
+type AccountProfileRow = {
   username: string
   first_name: string
   last_name: string
-  account_status:
-    | 'invited'
-    | 'active'
-    | 'suspended'
-    | 'locked'
-    | 'archived'
+  account_status: AccountStatus
   must_change_password: boolean
+}
+
+type UserRoleRow = {
+  role: AppRole
+}
+
+type Profile = AccountProfileRow & {
+  roles: AppRole[]
+}
+
+const ROLE_LABELS: Record<AppRole, string> = {
+  administrator: 'Administrateur',
+  direction: 'Direction',
+  school_life: 'Vie scolaire',
+  nurse: 'Infirmerie',
+  teacher: 'Professeur',
+  student: 'Élève',
+  parent: 'Parent',
+  company: 'Entreprise',
 }
 
 export function LoginPage() {
@@ -30,6 +61,34 @@ export function LoginPage() {
 
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isSigningOut, setIsSigningOut] =
+    useState(false)
+
+  function resetLogin() {
+    setProfile(null)
+    setUsername('')
+    setPassword('')
+    setError('')
+  }
+
+  async function handleSignOut() {
+    setIsSigningOut(true)
+    setError('')
+
+    const { error: signOutError } =
+      await supabase.auth.signOut()
+
+    if (signOutError) {
+      setError(
+        'La déconnexion a échoué. Veuillez réessayer.',
+      )
+      setIsSigningOut(false)
+      return
+    }
+
+    resetLogin()
+    setIsSigningOut(false)
+  }
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -56,48 +115,71 @@ export function LoginPage() {
 
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser()
 
-      if (!user) {
+      if (userError || !user) {
         throw new Error(
           'La session utilisateur est introuvable.',
         )
       }
 
-      const {
-        data: accountProfile,
-        error: profileError,
-      } = await supabase
-        .from('profiles')
-        .select(`
-          username,
-          first_name,
-          last_name,
-          account_status,
-          must_change_password
-        `)
-        .eq('id', user.id)
-        .single()
+      const [
+        profileResult,
+        rolesResult,
+      ] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select(`
+            username,
+            first_name,
+            last_name,
+            account_status,
+            must_change_password
+          `)
+          .eq('id', user.id)
+          .single(),
 
-      if (profileError) {
-  console.error(
-    'Erreur de chargement du profil :',
-    profileError,
-  )
+        supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id),
+      ])
 
-  throw new Error(
-    `Le profil administrateur est inaccessible : ${profileError.message}`,
-  )
-}
+      if (profileResult.error) {
+        console.error(
+          'Erreur de chargement du profil :',
+          profileResult.error,
+        )
 
-if (!accountProfile) {
-  throw new Error(
-    'Aucun profil ne correspond à ce compte.',
-  )
-}
+        throw new Error(
+          `Le profil utilisateur est inaccessible : ${profileResult.error.message}`,
+        )
+      }
+
+      if (!profileResult.data) {
+        throw new Error(
+          'Aucun profil ne correspond à ce compte.',
+        )
+      }
+
+      if (rolesResult.error) {
+        console.error(
+          'Erreur de chargement des rôles :',
+          rolesResult.error,
+        )
+
+        throw new Error(
+          'Les autorisations du compte sont inaccessibles.',
+        )
+      }
+
+      const accountProfile =
+        profileResult.data as AccountProfileRow
 
       if (
-        accountProfile.account_status === 'suspended' ||
+        accountProfile.account_status ===
+          'suspended' ||
         accountProfile.account_status === 'locked' ||
         accountProfile.account_status === 'archived'
       ) {
@@ -108,7 +190,22 @@ if (!accountProfile) {
         )
       }
 
-      setProfile(accountProfile as Profile)
+      const roles = (
+        (rolesResult.data ?? []) as UserRoleRow[]
+      ).map((row) => row.role)
+
+      if (roles.length === 0) {
+        await supabase.auth.signOut()
+
+        throw new Error(
+          'Aucun rôle n’est attribué à ce compte. Contactez un administrateur.',
+        )
+      }
+
+      setProfile({
+        ...accountProfile,
+        roles,
+      })
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
@@ -135,17 +232,95 @@ if (!accountProfile) {
     )
   }
 
-  if (profile) {
+  if (
+    profile?.roles.includes('administrator')
+  ) {
     return (
       <AdminDashboardPage
         firstName={profile.first_name}
         lastName={profile.last_name}
-        onSignOut={() => {
-          setProfile(null)
-          setUsername('')
-          setPassword('')
-        }}
+        onSignOut={resetLogin}
       />
+    )
+  }
+
+  if (profile) {
+    return (
+      <main className="login-page">
+        <section className="login-access-denied">
+          <span
+            className="login-mobile-mark login-access-mark"
+            aria-hidden="true"
+          >
+            SG
+          </span>
+
+          <p className="login-kicker">
+            Espace personnel
+          </p>
+
+          <h1>
+            Bonjour, {profile.first_name}
+          </h1>
+
+          <p>
+            Votre authentification a réussi, mais votre
+            espace personnel n’est pas encore disponible.
+          </p>
+
+          <div className="login-role-summary">
+            <span>
+              {profile.roles.length > 1
+                ? 'Rôles attribués'
+                : 'Rôle attribué'}
+            </span>
+
+            <div className="login-role-list">
+              {profile.roles.map((role) => (
+                <strong key={role}>
+                  {ROLE_LABELS[role]}
+                </strong>
+              ))}
+            </div>
+          </div>
+
+          <p className="login-access-information">
+            Vous n’avez pas accès à l’espace
+            d’administration. Un espace adapté à votre rôle
+            sera proposé séparément.
+          </p>
+
+          {error && (
+            <div
+              className="login-error"
+              role="alert"
+            >
+              <span aria-hidden="true">!</span>
+              <p>{error}</p>
+            </div>
+          )}
+
+          <button
+            className="login-submit"
+            type="button"
+            onClick={() => void handleSignOut()}
+            disabled={isSigningOut}
+          >
+            {isSigningOut ? (
+              <>
+                <span
+                  className="login-spinner"
+                  aria-hidden="true"
+                />
+
+                Déconnexion en cours…
+              </>
+            ) : (
+              'Se déconnecter'
+            )}
+          </button>
+        </section>
+      </main>
     )
   }
 
@@ -163,7 +338,9 @@ if (!accountProfile) {
 
             <div>
               <p>Ensemble scolaire</p>
-              <strong>Saint Georges Coccinet</strong>
+              <strong>
+                Saint Georges Coccinet
+              </strong>
             </div>
           </div>
 
@@ -207,7 +384,10 @@ if (!accountProfile) {
         <div className="login-form-panel">
           <div className="login-form-container">
             <header className="login-form-header">
-              <span className="login-mobile-mark">
+              <span
+                className="login-mobile-mark"
+                aria-hidden="true"
+              >
                 SG
               </span>
 
@@ -294,6 +474,7 @@ if (!accountProfile) {
                       className="login-spinner"
                       aria-hidden="true"
                     />
+
                     Connexion en cours…
                   </>
                 ) : (

@@ -817,3 +817,83 @@
     flex-direction: column;
   }
 }
+/* =========================================================
+   Utilisateurs et rôles
+   ========================================================= */
+
+.admin-user-filters {
+  grid-template-columns:
+    minmax(280px, 1.6fr)
+    repeat(2, minmax(180px, 1fr));
+}
+
+.admin-users-table {
+  min-width: 1550px;
+}
+
+.admin-user-control {
+  display: flex;
+  min-width: 190px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.admin-user-control .admin-select {
+  min-width: 170px;
+}
+
+.admin-role-grid {
+  display: flex;
+  min-width: 500px;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.admin-role-chip {
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid #d8e0ee;
+  border-radius: 999px;
+  color: #667085;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.admin-role-chip:hover:not(:disabled) {
+  border-color: #93b4f5;
+  color: #1d4ed8;
+  background: #eff6ff;
+  transform: translateY(-1px);
+}
+
+.admin-role-chip.is-active {
+  border-color: #86efac;
+  color: #047857;
+  background: #ecfdf5;
+}
+
+.admin-role-chip.is-active:hover:not(:disabled) {
+  border-color: #fecaca;
+  color: #b91c1c;
+  background: #fff1f2;
+}
+
+.admin-role-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+@media (max-width: 900px) {
+  .admin-user-filters {
+    grid-template-columns: 1fr;
+  }
+}
