@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { usernameToInternalEmail } from '../lib/auth'
 import { FirstLoginPage } from './FirstLoginPage'
 import { AdminDashboardPage } from './AdminDashboardPage'
+import { StudentDashboardPage } from './StudentDashboardPage'
 import './LoginPage.css'
 
 type AppRole =
@@ -61,6 +62,7 @@ export function LoginPage() {
 
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
   const [isSigningOut, setIsSigningOut] =
     useState(false)
 
@@ -232,6 +234,12 @@ export function LoginPage() {
     )
   }
 
+  /*
+   * L’ordre des rôles est important :
+   * un utilisateur qui possède aussi le rôle administrateur
+   * est dirigé en priorité vers l’administration.
+   */
+
   if (
     profile?.roles.includes('administrator')
   ) {
@@ -243,6 +251,26 @@ export function LoginPage() {
       />
     )
   }
+
+  /*
+   * Un utilisateur possédant le rôle student est dirigé
+   * vers son espace Élève et ne voit pas l’administration.
+   */
+
+  if (profile?.roles.includes('student')) {
+    return (
+      <StudentDashboardPage
+        firstName={profile.first_name}
+        lastName={profile.last_name}
+        onSignOut={resetLogin}
+      />
+    )
+  }
+
+  /*
+   * Écran temporaire pour les rôles dont l’espace
+   * personnel n’a pas encore été développé.
+   */
 
   if (profile) {
     return (
@@ -338,6 +366,7 @@ export function LoginPage() {
 
             <div>
               <p>Ensemble scolaire</p>
+
               <strong>
                 Saint Georges Coccinet
               </strong>
