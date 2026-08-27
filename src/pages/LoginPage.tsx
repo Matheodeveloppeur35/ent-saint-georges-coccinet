@@ -8,6 +8,7 @@ import { FirstLoginPage } from './FirstLoginPage'
 import { AdminDashboardPage } from './AdminDashboardPage'
 import { StudentDashboardPage } from './StudentDashboardPage'
 import './LoginPage.css'
+import { TeacherDashboardPage } from './TeacherDashboardPage'
 
 type AppRole =
   | 'administrator'
@@ -256,6 +257,15 @@ export function LoginPage() {
    * Un utilisateur possédant le rôle student est dirigé
    * vers son espace Élève et ne voit pas l’administration.
    */
+if (profile?.roles.includes('teacher')) {
+  return (
+    <TeacherDashboardPage
+      firstName={profile.first_name}
+      lastName={profile.last_name}
+      onSignOut={resetLogin}
+    />
+  )
+}
 
   if (profile?.roles.includes('student')) {
     return (
