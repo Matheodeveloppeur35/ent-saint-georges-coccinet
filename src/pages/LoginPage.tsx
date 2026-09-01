@@ -9,6 +9,7 @@ import { AdminDashboardPage } from './AdminDashboardPage'
 import { StudentDashboardPage } from './StudentDashboardPage'
 import './LoginPage.css'
 import { TeacherDashboardPage } from './TeacherDashboardPage'
+import { DirectionDashboardPage } from './DirectionDashboardPage'
 
 type AppRole =
   | 'administrator'
@@ -252,6 +253,15 @@ export function LoginPage() {
       />
     )
   }
+if (profile?.roles.includes('direction')) {
+  return (
+    <DirectionDashboardPage
+      firstName={profile.first_name}
+      lastName={profile.last_name}
+      onSignOut={resetLogin}
+    />
+  )
+}
 
   /*
    * Un utilisateur possédant le rôle student est dirigé
