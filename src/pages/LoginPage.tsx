@@ -10,6 +10,7 @@ import { StudentDashboardPage } from './StudentDashboardPage'
 import './LoginPage.css'
 import { TeacherDashboardPage } from './TeacherDashboardPage'
 import { DirectionDashboardPage } from './DirectionDashboardPage'
+import { SchoolLifeDashboardPage } from './SchoolLifeDashboardPage'
 
 type AppRole =
   | 'administrator'
@@ -256,6 +257,15 @@ export function LoginPage() {
 if (profile?.roles.includes('direction')) {
   return (
     <DirectionDashboardPage
+      firstName={profile.first_name}
+      lastName={profile.last_name}
+      onSignOut={resetLogin}
+    />
+  )
+}
+if (profile?.roles.includes('school_life')) {
+  return (
+    <SchoolLifeDashboardPage
       firstName={profile.first_name}
       lastName={profile.last_name}
       onSignOut={resetLogin}
