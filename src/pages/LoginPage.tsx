@@ -12,6 +12,7 @@ import { TeacherDashboardPage } from './TeacherDashboardPage'
 import { DirectionDashboardPage } from './DirectionDashboardPage'
 import { SchoolLifeDashboardPage } from './SchoolLifeDashboardPage'
 import { NurseDashboardPage } from './NurseDashboardPage'
+import { ParentDashboardPage } from './ParentDashboardPage'
 
 type AppRole =
   | 'administrator'
@@ -290,6 +291,15 @@ if (profile?.roles.includes('nurse')) {
 if (profile?.roles.includes('teacher')) {
   return (
     <TeacherDashboardPage
+      firstName={profile.first_name}
+      lastName={profile.last_name}
+      onSignOut={resetLogin}
+    />
+  )
+}
+if (profile?.roles.includes('parent')) {
+  return (
+    <ParentDashboardPage
       firstName={profile.first_name}
       lastName={profile.last_name}
       onSignOut={resetLogin}
